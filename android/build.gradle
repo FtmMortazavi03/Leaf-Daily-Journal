@@ -1,0 +1,20 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.myket.ir' }
+        maven { url 'https://maven.devneeds.ir' }
+        maven { url 'https://gradle.iranrepo.ir' }
+        maven { url 'https://en-mirror.ir' }
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1'
+        classpath 'com.google.gms:google-services:4.4.0'
+    }
+}
+
+apply from: "variables.gradle"
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

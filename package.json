@@ -1,0 +1,22 @@
+{
+  "name": "leaf-daily-journal",
+  "version": "1.0.0",
+  "description": "Leaf — an offline daily study journal with subject targets, progress charts, and JSON backup.",
+  "author": "Fatemehsadat Mortazavi",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync",
+    "add:android": "cap add android",
+    "open:android": "cap open android",
+    "run:android": "cap run android",
+    "build:android": "cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
