@@ -269,10 +269,10 @@ input,select{font-family:var(--font);font-size:inherit}
 .heatmap-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .heatmap-head h3{font-size:.9rem;font-weight:600;color:var(--muted);margin:0}
 .heatmap-head .sub{font-size:.75rem;color:var(--dim)}
-.heatmap-scroll{overflow-x:hidden;width:100%;padding-bottom:6px;direction:ltr;}
-.heatmap-wrapper{display:flex;flex-direction:row;gap:2px;width:100%;direction:ltr;justify-content:space-between;}
-.heatmap-week-col{display:flex;flex-direction:column;gap:2px;align-items:center;flex:1;}
-.heatmap-cells-col{display:flex;flex-direction:column;gap:2px;width:100%;}
+.heatmap-scroll{overflow-y:auto;overflow-x:hidden;padding:6px 0;direction:ltr;max-height:450px;}
+.heatmap-wrapper{display:flex;flex-direction:column-reverse;gap:2px;width:100%;direction:ltr;align-items:flex-start;}
+.heatmap-week-col{display:flex;flex-direction:row;gap:2px;align-items:center;width:100%;}
+.heatmap-cells-col{display:flex;flex-direction:row;gap:2px;width:100%;}
 .heatmap-cell{width:100%;aspect-ratio:1;border-radius:2px;background:var(--surface2);transition:transform .15s;}
 .heatmap-cell:hover{transform:scale(1.4);outline:1px solid var(--text);outline-offset:1px;cursor:pointer;z-index:2;position:relative;}
 .heatmap-cell[data-lvl="0"]{background:var(--surface2);}
@@ -399,9 +399,116 @@ body::before {
 [data-palette="teal"] .hero-number { text-shadow: 0 0 30px rgba(13, 148, 136, 0.3); }
 [data-palette="pink"] .hero-number { text-shadow: 0 0 30px rgba(219, 39, 119, 0.3); }
 
+
+/* ============================================================
+   MOBILE REFINEMENTS
+   ============================================================ */
+
+/* 1. تنظیمات (Restore) - فقط در صورتی که از قبل نباشه */
+.set-group{margin-bottom:24px}
+.set-group h3{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:14px}
+.set-row:last-child{border-bottom:none}
+.set-row label{font-size:.9rem;font-weight:500}
+.set-row select,.set-row input[type=text]{padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:.88rem;max-width:180px;transition:.2s}
+.set-row select:focus,.set-row input:focus{outline:none;border-color:var(--accent)}
+
+/* 2. دکمه‌های مودال (ویرایش جلسه و تایید) - نرم و خوشگل */
+.modal .btn {
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.modal .btn-ghost {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.modal .btn-ghost:hover {
+  background: var(--surface3);
+  border-color: var(--border2);
+  transform: translateY(-1px);
+}
+.modal .btn-ghost:active {
+  transform: scale(0.96);
+}
+.modal .btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #ffffff;
+  border: none;
+}
+.modal .btn-danger:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+.modal .btn-danger:active {
+  transform: scale(0.96);
+}
+.modal .btn-primary {
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent), #000 15%));
+  color: var(--accent-text);
+  border: none;
+}
+.modal .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-soft);
+}
+.modal .btn-primary:active {
+  transform: scale(0.96);
+}
+
+/* 3. نوار پایینی (Bottom Nav) - نرم و شیک */
+.bnav {
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+.nav-btn {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 12px;
+  margin: 0 2px;
+}
+.nav-btn .ico {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.nav-btn.active .ico {
+  transform: translateY(-2px) scale(1.1);
+}
+.nav-btn.active::after {
+  display: none; /* حذف مستطیل زیرین */
+}
+.nav-btn:active .ico {
+  transform: scale(0.9);
+}
+
+/* 4. انیمیشن برای جابه‌جایی صفحات (Swipe) */
+@keyframes fadeScreen {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.screen.active {
+  animation: fadeScreen 0.2s ease-out forwards;
+}
+
 </style>
 <link rel="stylesheet" href="./premium-effects.css">
-<link rel="stylesheet" href="./effects.css">
+
 </head>
 <body>
 
@@ -1657,6 +1764,63 @@ function switchScreen(name) {
   if (name !== 'today') closeSubjPanel();
 }
 
+  // Swipe navigation between screens
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+  const screenOrder = ['today', 'history', 'stats', 'settings'];
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleSwipe();
+  }, { passive: true });
+
+  function handleSwipe() {
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+    // Only horizontal swipes (dx > dy) and minimum distance 80px
+    if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy)) return;
+    
+    // Don't trigger swipe if a modal is open
+    if (document.querySelector('.mbg.show')) return;
+    
+    const currentIdx = screenOrder.indexOf(curScreen);
+    if (currentIdx === -1) return;
+    
+    // Check if the page is RTL (Persian or Arabic)
+    const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
+    
+    // In RTL, the meaning of left/right is reversed
+    // Swipe right (dx > 0) in RTL should go to NEXT screen (which is visually on the left)
+    // Swipe left (dx < 0) in RTL should go to PREVIOUS screen (which is visually on the right)
+    
+    setTimeout(() => {
+      if (isRTL) {
+        // RTL: dx > 0 (swipe right) -> next, dx < 0 (swipe left) -> previous
+        if (dx > 0 && currentIdx < screenOrder.length - 1) {
+          switchScreen(screenOrder[currentIdx + 1]);
+        } else if (dx < 0 && currentIdx > 0) {
+          switchScreen(screenOrder[currentIdx - 1]);
+        }
+      } else {
+        // LTR: dx > 0 (swipe right) -> previous, dx < 0 (swipe left) -> next
+        if (dx > 0 && currentIdx > 0) {
+          switchScreen(screenOrder[currentIdx - 1]);
+        } else if (dx < 0 && currentIdx < screenOrder.length - 1) {
+          switchScreen(screenOrder[currentIdx + 1]);
+        }
+      }
+    }, 20);
+  }
+
+
 function closeModal(id) { const m = $(id); if (m) m.classList.remove('show'); }
 function openModal(id) { const m = $(id); if (m) m.classList.add('show'); }
 
@@ -2107,15 +2271,17 @@ async function deleteEditedSession() {
 function renderStats() {
   const L = t();
   const lang = state.user.lang;
+  const toLocalNum = (n) => String(n).replace(/\d/g, d => {
+    if (lang === 'fa') return '۰۱۲۳۴۵۶۷۸۹'[d];
+    if (lang === 'ar') return '٠١٢٣٤٥٦٧٨٩'[d];
+    return d;
+  });
 
-  // تابع کمکی: تبدیل دقیقه به فرمت ساعت:دقیقه (مثلاً 1:15)
   const fmtStat = (mins) => {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    if (m === 0) return num(h, lang) + ':00';
-    // استفاده از صفر برای دقیقه‌های تک رقمی (مثلاً 1:05)
     const mStr = String(m).padStart(2, '0');
-    return num(h, lang) + ':' + num(Number(mStr), lang).padStart(2, lang === 'fa' ? '۰' : (lang === 'ar' ? '٠' : '0'));
+    return toLocalNum(h) + ':' + toLocalNum(mStr);
   };
 
   $('stToday').textContent = fmtStat(todayTotal());
@@ -2136,7 +2302,7 @@ function renderStats() {
     if (totalFor(k) > 0) streak++;
     else break;
   }
-  $('stStreak').textContent = num(streak, lang);
+  $('stStreak').textContent = toLocalNum(streak);
   $('stStreakL').textContent = L.stStreak;
 }
 

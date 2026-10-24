@@ -74,3 +74,52 @@ body::before {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* ============================================================
+   SETTINGS & CORE UI RESTORATION
+   ============================================================ */
+.set-group{margin-bottom:24px}
+.set-group h3{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:14px}
+.set-row:last-child{border-bottom:none}
+.set-row label{font-size:.9rem;font-weight:500}
+.set-row select,.set-row input[type=text]{padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:.88rem;max-width:180px;transition:.2s}
+.set-row select:focus,.set-row input:focus{outline:none;border-color:var(--accent)}
+.switch{position:relative;width:44px;height:26px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;transition:.2s;flex-shrink:0}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);transition:.2s}
+.switch.on{background:var(--accent);border-color:var(--accent)}
+.switch.on::after{left:20px;border-color:var(--accent);background:var(--accent-text)}
+.prow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.pdot{width:32px;height:32px;border-radius:50%;border:2px solid transparent;transition:.2s;cursor:pointer;position:relative}
+.pdot:hover{transform:scale(1.12)}
+.pdot.sel{border-color:var(--text);box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--accent)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:12px 18px;border-radius:10px;font-size:.88rem;font-weight:600;transition:.2s}
+.btn-primary{background:var(--accent);color:var(--accent-text)}
+.btn-primary:hover{opacity:.9}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);border-color:var(--border2)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--border)}
+.btn-danger:hover{background:rgba(220,38,38,.08);border-color:var(--danger)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Subjects Grid */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:12px}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative;transition:.2s}
+.scard:hover{border-color:var(--border2)}
+.shead{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-inline-end:20px}
+.shead .n{font-weight:600;font-size:.85rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sstats{font-size:.72rem;color:var(--muted);line-height:1.6;font-variant-numeric:tabular-nums}
+.sstats b{color:var(--text)}
+.sdel{position:absolute;top:6px;inset-inline-end:6px;width:20px;height:20px;border-radius:50%;color:var(--dim);font-size:.7rem;display:grid;place-items:center;transition:.15s;background:transparent;border:none}
+.sdel:hover{background:var(--surface2);color:var(--danger)}
+.igroup{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+@media(min-width:480px){.igroup{grid-template-columns:2fr 1fr auto auto}}
+.igroup input[type=text],.igroup input[type=number]{padding:12px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:.9rem}
+.igroup input:focus{outline:none;border-color:var(--accent)}
+.igroup input[type=number]{text-align:center;font-weight:700;-moz-appearance:textfield;appearance:textfield}
+.igroup input[type=number]::-webkit-outer-spin-button,.igroup input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.cpick{width:44px;height:42px;border-radius:10px;border:1px solid var(--border2);background:transparent;padding:0;cursor:pointer}
+.cpick::-webkit-color-swatch-wrapper{padding:2px}
+.cpick::-webkit-color-swatch{border:none;border-radius:6px}
