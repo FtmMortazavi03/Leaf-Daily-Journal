@@ -61,3 +61,8 @@ build/
 *.p12
 *.pepk
 release/
+# Android signing secrets
+*.jks
+*.keystore
+key.properties
+*.jks.bak
