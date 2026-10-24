@@ -23,6 +23,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#fafafa" id="metaTheme">
 <title>Leaf — Your Daily Journal</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Leaf">
 <script src="./chart.umd.min.js" onerror="window.__chartMissing=true"></script>
 <style>
 :root{
@@ -613,6 +617,8 @@ input,select{font-family:var(--font);font-size:inherit}
         <button type="button" class="btn btn-ghost" id="importBtn" style="flex:1">Restore</button>
         <input type="file" id="importFile" accept=".json" hidden>
       </div>
+      <button type="button" class="btn btn-ghost" id="importCsvBtn" style="width:100%;margin-top:10px">Import CSV</button>
+      <input type="file" id="importCsvFile" accept=".csv,text/csv" hidden>
       <button type="button" class="btn btn-ghost" id="quickBackupBtn" style="width:100%;margin-top:10px">Quick backup (JSON)</button>
       <button type="button" class="btn btn-ghost" id="exportCsvBtn" style="width:100%;margin-top:10px"></button>
       <button type="button" class="btn btn-danger" id="resetBtn" style="width:100%;margin-top:10px">Reset all data</button>
@@ -784,6 +790,13 @@ This journal is yours alone. No account, no server, no internet. Here, your data
     defSubj1:'Math', defSubj2:'English',
     csvNoData:'No data to export',
     csvHeader:'Date,Subject,Duration (min)\n',
+    importCsv:'Import CSV',
+    importCsvTitle:'Import CSV',
+    importCsvHint:'Expected columns: Date (YYYY-MM-DD), Subject, Duration (min). New subjects will be created automatically.',
+    importCsvConfirm:(s,n,sk)=>`Found ${s} session(s) and ${n} new subject(s). ${sk>0?`${sk} invalid row(s) will be skipped. `:''}Add them to your data?`,
+    importCsvDone:(s)=>`${s} session(s) imported.`,
+    importCsvNone:'No valid rows found in the file.',
+    importCsvInvalid:'Could not read the CSV file.',
     chartUnavailable:'Chart library unavailable — statistics hidden.',
     nameTaken:'This subject name already exists.',
     chartMissing:'Charts unavailable',
@@ -849,6 +862,13 @@ weekRange:(a,b)=>`Week: ${a} to ${b}`,
     defSubj1:'ریاضی', defSubj2:'انگلیسی',
     csvNoData:'داده‌ای برای خروجی نیست',
     csvHeader:'تاریخ,درس,مدت (دقیقه)\n',
+    importCsv:'ایمپورت CSV',
+    importCsvTitle:'ایمپورت CSV',
+    importCsvHint:'ستون‌های مورد انتظار: تاریخ (YYYY-MM-DD)، درس، مدت (دقیقه). درس‌های جدید خودکار ساخته می‌شوند.',
+    importCsvConfirm:(s,n,sk)=>`${s} جلسه و ${n} درس جدید پیدا شد.${sk>0?` ${sk} ردیف نامعتبر رد می‌شود.`:''} به داده‌هایت اضافه شوند؟`,
+    importCsvDone:(s)=>`${s} جلسه ایمپورت شد.`,
+    importCsvNone:'هیچ ردیف معتبری در فایل پیدا نشد.',
+    importCsvInvalid:'خواندن فایل CSV ممکن نشد.',
     chartUnavailable:'کتابخانه نمودار در دسترس نیست — آمار پنهان شد.',
     nameTaken:'این نام درس قبلاً وجود داره.',
     chartMissing:'نمودارها در دسترس نیستن',
@@ -914,6 +934,13 @@ weekRange:(a,b)=>`هفته: ${a} تا ${b}`,
     defSubj1:'الرياضيات', defSubj2:'الإنجليزية',
     csvNoData:'لا توجد بيانات للتصدير',
     csvHeader:'التاريخ,المادة,المدة (دقيقة)\n',
+    importCsv:'استيراد CSV',
+    importCsvTitle:'استيراد CSV',
+    importCsvHint:'الأعمدة المتوقعة: التاريخ (YYYY-MM-DD)، المادة، المدة (دقيقة). ستُنشأ المواد الجديدة تلقائياً.',
+    importCsvConfirm:(s,n,sk)=>`تم العثور على ${s} جلسة و ${n} مادة جديدة.${sk>0?` سيتم تجاهل ${sk} صفاً غير صالح.`:''} هل تريد إضافتها إلى بياناتك؟`,
+    importCsvDone:(s)=>`تم استيراد ${s} جلسة.`,
+    importCsvNone:'لم يتم العثور على صفوف صالحة في الملف.',
+    importCsvInvalid:'تعذّر قراءة ملف CSV.',
     chartUnavailable:'مكتبة الرسوم غير متوفرة — الإحصائيات مخفية.',
     nameTaken:'اسم المادة موجود مسبقاً.',
     chartMissing:'الرسوم غير متوفرة',
@@ -1437,6 +1464,8 @@ function boot() {
   $('exportCsvBtn').addEventListener('click', exportCSV);
   $('importBtn').addEventListener('click', () => $('importFile').click());
   $('importFile').addEventListener('change', importData);
+  $('importCsvBtn').addEventListener('click', () => $('importCsvFile').click());
+  $('importCsvFile').addEventListener('change', importCSV);
   $('resetBtn').addEventListener('click', resetAll);
   $('setLangSel').addEventListener('change', e => changeLanguage(e.target.value));
   $('setCalSel').addEventListener('change', e => { state.user.cal = e.target.value; save(); renderAll(); });
@@ -2114,6 +2143,7 @@ function renderLabels() {
   $('setDataL').textContent = L.setDataL;
   $('exportBtn').textContent = L.backup;
   $('importBtn').textContent = L.restore;
+  $('importCsvBtn').textContent = L.importCsv;
   $('quickBackupBtn').textContent = L.quickBackup;
   $('exportCsvBtn').textContent = L.exportCsv;
   $('resetBtn').textContent = L.reset;
@@ -2396,6 +2426,114 @@ function importData(e) {
   r.onerror = () => toast(t().invalidFile, 'error');
   r.readAsText(f); e.target.value = '';
 }
+
+/* -------- CSV import -------- */
+/* Minimal CSV parser: supports quoted fields, escaped quotes, commas, CRLF. */
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i+1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c === '\r') { /* ignore */ }
+      else field += c;
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+const CSV_COLORS = ['#dc2626','#2563eb','#16a34a','#9333ea','#ea580c','#0d9488','#db2777','#71717a'];
+
+function importCSV(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = async (ev) => {
+    try {
+      let raw = String(ev.target.result || '');
+      // Strip UTF-8 BOM if present
+      if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+      const rows = parseCSV(raw);
+      if (!rows.length) { toast(t().importCsvNone, 'error'); return; }
+
+      // Skip header row if it doesn't look like data
+      let start = 0;
+      if (rows[0] && rows[0].length >= 3) {
+        const maybeDate = String(rows[0][0] || '').trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(maybeDate)) start = 1;
+      }
+
+      const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+      const valid = [];
+      const newSubjectNames = new Set();
+      let skipped = 0;
+
+      for (let i = start; i < rows.length; i++) {
+        const r2 = rows[i];
+        if (!r2 || r2.length < 3) { skipped++; continue; }
+        const date = String(r2[0] || '').trim();
+        const subj = String(r2[1] || '').trim();
+        const dur = parseInt(String(r2[2] || '').trim(), 10);
+        if (!dateRe.test(date)) { skipped++; continue; }
+        if (!subj) { skipped++; continue; }
+        if (!Number.isFinite(dur) || dur <= 0 || dur > MAX_DAILY_MINUTES) { skipped++; continue; }
+        // existing subject?
+        const existing = state.subjects.find(s => s.name.toLowerCase() === subj.toLowerCase());
+        if (!existing) newSubjectNames.add(subj);
+        valid.push({ date, subjectName: subj, duration: dur });
+      }
+
+      if (!valid.length) { toast(t().importCsvNone, 'error'); return; }
+
+      const msg = t().importCsvConfirm(valid.length, newSubjectNames.size, skipped);
+      if (!(await askConfirm(msg))) return;
+
+      // Create new subjects
+      for (const name of newSubjectNames) {
+        const color = CSV_COLORS[state.subjects.length % CSV_COLORS.length];
+        state.subjects.push({ id: cryptoId(), name, color, dailyTarget: 0 });
+      }
+      // Map names to ids
+      const nameToId = {};
+      state.subjects.forEach(s => { nameToId[s.name.toLowerCase()] = s.id; });
+
+      // Append sessions
+      const now = Date.now();
+      valid.forEach((v, idx) => {
+        const sid = nameToId[v.subjectName.toLowerCase()];
+        if (!sid) return;
+        state.sessions.push({
+          id: cryptoId(),
+          subjectId: sid,
+          durationMinutes: v.duration,
+          date: v.date,
+          createdAt: now + idx,
+        });
+      });
+
+      save();
+      renderAll();
+      renderSettings();
+      toast(t().importCsvDone(valid.length), 'success');
+    } catch(err) {
+      console.warn('CSV import failed', err);
+      toast(t().importCsvInvalid, 'error');
+    } finally {
+      e.target.value = '';
+    }
+  };
+  r.onerror = () => { toast(t().importCsvInvalid, 'error'); e.target.value = ''; };
+  r.readAsText(f, 'utf-8');
+}
 async function resetAll() {
   if (!(await askConfirm(t().confirmReset))) return;
   try { sessionStorage.setItem(RESET_FLAG, '1'); } catch(e) { console.warn('sessionStorage blocked', e); }
@@ -2543,6 +2681,13 @@ document.addEventListener('input', (e) => {
 initOB();
 
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
