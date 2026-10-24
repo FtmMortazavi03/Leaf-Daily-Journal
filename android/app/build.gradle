@@ -24,6 +24,7 @@ android {
             keyPassword System.getenv("LEAF_KEY_PASSWORD") ?: "REPLACE_ME"
         }
     }
+    
     }
 
     buildTypes {
