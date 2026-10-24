@@ -141,7 +141,7 @@ input,select{font-family:var(--font);font-size:inherit}
 .hero-number{font-size:3.2rem;font-weight:800;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;position:relative;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .hero-number .unit{font-size:1rem;font-weight:500;color:var(--muted);letter-spacing:0}
 .hero-number .pct{font-size:.9rem;font-weight:700;color:var(--accent);padding:3px 10px;border-radius:999px;background:var(--accent-soft);letter-spacing:0;font-variant-numeric:tabular-nums}
-.hero-number .hm{font-size:1rem;font-weight:700;color:var(--muted);letter-spacing:0;font-variant-numeric:tabular-nums;margin-inline-start:4px}
+.hero-number .hm{font-size:.95rem;font-weight:600;color:var(--muted);letter-spacing:0;font-variant-numeric:tabular-nums;margin-inline-start:6px}
 .hero-sub{font-size:.85rem;color:var(--muted);margin-top:8px;font-variant-numeric:tabular-nums;position:relative}
 .hero-sub.warn{color:var(--danger);font-weight:600}
 .hero-sub.done{color:var(--success);font-weight:600}
@@ -342,8 +342,8 @@ input,select{font-family:var(--font);font-size:inherit}
 .confirm-modal .macts{justify-content:flex-end;margin-top:20px;gap:10px}
 .confirm-modal p{font-size:.9rem;color:var(--text);margin-bottom:0}
 
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--accent);color:var(--accent-text);padding:12px 18px;border-radius:12px;font-weight:600;font-size:.85rem;transition:transform .3s ease;z-index:1000;max-width:90vw;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(200px);background:var(--accent);color:var(--accent-text);padding:12px 18px;border-radius:12px;font-weight:600;font-size:.85rem;transition:transform .3s ease, opacity .3s ease;opacity:0;pointer-events:none;z-index:1000;max-width:90vw;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 .toast .undo{background:rgba(255,255,255,.25);color:var(--accent-text);border:none;padding:5px 12px;border-radius:6px;font-size:.75rem;font-weight:700;font-family:var(--font);cursor:pointer}
 .toast .undo:hover{background:rgba(255,255,255,.4)}
 
@@ -467,8 +467,7 @@ input,select{font-family:var(--font);font-size:inherit}
         <button class="hero-edit" id="editTarget" type="button">Target</button>
       </div>
       <div class="hero-number">
-        <span id="heroNum">0</span>
-        <span class="unit" id="heroUnit">min</span>
+        <span id="heroNum">0:00</span>
         <span class="hm" id="heroHM"></span>
         <span class="pct" id="heroPct" style="display:none">0%</span>
       </div>
@@ -985,29 +984,61 @@ function toHijri(gy, gm, gd) {
   return [hy, hm, hd];
 }
 
-const PM = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-const EM = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const HM = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
-const FW = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
-const EW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const AW = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+/* Day names, indexed by getDay(): 0=Sunday ... 6=Saturday */
+const WEEKDAYS = {
+  en: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  fa: ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'],
+  ar: ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
+};
+
+/* Month names per language per calendar. Index 0..11. */
+const MONTHS = {
+  en: {
+    gregorian: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    jalali:    ['Farvardin','Ordibehesht','Khordad','Tir','Mordad','Shahrivar','Mehr','Aban','Azar','Dey','Bahman','Esfand'],
+    hijri:     ['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Ula','Jumada al-Akhirah','Rajab','Shaban','Ramadan','Shawwal','Dhu al-Qadah','Dhu al-Hijjah'],
+  },
+  fa: {
+    gregorian: ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'],
+    jalali:    ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'],
+    hijri:     ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'],
+  },
+  ar: {
+    gregorian: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
+    jalali:    ['فروَردين','ارديبهشت','خرداد','تير','مرداد','شهريور','مهر','آبان','آذر','دی','بهمن','اسفند'],
+    hijri:     ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'],
+  },
+};
+
+function monthName(cal, idx, lang) {
+  const L = MONTHS[lang] || MONTHS.en;
+  const arr = L[cal] || L.gregorian;
+  return arr[idx] || '';
+}
+function weekdayName(dow, lang) {
+  const arr = WEEKDAYS[lang] || WEEKDAYS.en;
+  return arr[dow] || '';
+}
 
 function fmtJalali(d, lang) {
   const [jy, jm, jd] = toJalali(d.getFullYear(), d.getMonth()+1, d.getDate());
-  const wd = lang === 'fa' ? FW[d.getDay()] : (lang === 'ar' ? AW[d.getDay()] : EW[d.getDay()]);
-  if (lang === 'en') return `${wd}, ${jd} ${PM[jm-1]} ${jy}`;
-  return `${wd}، ${num(jd, lang)} ${PM[jm-1]} ${num(jy, lang)}`;
+  const wd = weekdayName(d.getDay(), lang);
+  const mn = monthName('jalali', jm-1, lang);
+  if (lang === 'en') return `${wd}, ${jd} ${mn} ${jy}`;
+  return `${wd}، ${num(jd, lang)} ${mn} ${num(jy, lang)}`;
 }
 function fmtGregorian(d, lang) {
-  const wd = lang === 'fa' ? FW[d.getDay()] : (lang === 'ar' ? AW[d.getDay()] : EW[d.getDay()]);
-  if (lang === 'en') return `${wd}, ${d.getDate()} ${EM[d.getMonth()]} ${d.getFullYear()}`;
-  return `${wd}، ${num(d.getDate(), lang)} ${EM[d.getMonth()]} ${num(d.getFullYear(), lang)}`;
+  const wd = weekdayName(d.getDay(), lang);
+  const mn = monthName('gregorian', d.getMonth(), lang);
+  if (lang === 'en') return `${wd}, ${d.getDate()} ${mn} ${d.getFullYear()}`;
+  return `${wd}، ${num(d.getDate(), lang)} ${mn} ${num(d.getFullYear(), lang)}`;
 }
 function fmtHijri(d, lang) {
   const [hy, hm, hd] = toHijri(d.getFullYear(), d.getMonth()+1, d.getDate());
-  const wd = lang === 'fa' ? FW[d.getDay()] : (lang === 'ar' ? AW[d.getDay()] : EW[d.getDay()]);
-  if (lang === 'en') return `${wd}, ${hd} ${HM[hm-1]} ${hy} AH`;
-  return `${wd}، ${num(hd, lang)} ${HM[hm-1]} ${num(hy, lang)}`;
+  const wd = weekdayName(d.getDay(), lang);
+  const mn = monthName('hijri', hm-1, lang);
+  if (lang === 'en') return `${wd}, ${hd} ${mn} ${hy} AH`;
+  return `${wd}، ${num(hd, lang)} ${mn} ${num(hy, lang)}`;
 }
 function fmtDate(d, lang, cal) {
   if (cal === 'jalali') return fmtJalali(d, lang);
@@ -1017,13 +1048,13 @@ function fmtDate(d, lang, cal) {
 function fmtShort(d, lang, cal) {
   if (cal === 'jalali') {
     const [, jm, jd] = toJalali(d.getFullYear(), d.getMonth()+1, d.getDate());
-    return `${num(jd, lang)} ${PM[jm-1]}`;
+    return `${num(jd, lang)} ${monthName('jalali', jm-1, lang)}`;
   }
   if (cal === 'hijri') {
     const [, hm, hd] = toHijri(d.getFullYear(), d.getMonth()+1, d.getDate());
-    return `${num(hd, lang)} ${HM[hm-1]}`;
+    return `${num(hd, lang)} ${monthName('hijri', hm-1, lang)}`;
   }
-  return `${num(d.getDate(), lang)} ${EM[d.getMonth()]}`;
+  return `${num(d.getDate(), lang)} ${monthName('gregorian', d.getMonth(), lang)}`;
 }
 function fmtMin(m, lang) {
   const h = Math.floor(m/60), mm = m%60;
@@ -1034,12 +1065,16 @@ function fmtMin(m, lang) {
 function fmtS(m, lang) {
   if (m < 60) return lang === 'fa' ? `${num(m,lang)}د` : (lang === 'ar' ? `${num(m,lang)}د` : `${m}m`);
   const h = Math.floor(m/60), mm = m%60;
-  return mm ? `${num(h,lang)}:${String(mm).padStart(2,'0')}` : lang === 'fa' ? `${num(h,lang)}س` : (lang === 'ar' ? `${num(h,lang)}س` : `${h}h`);
+  if (!mm) return lang === 'fa' ? `${num(h,lang)}س` : (lang === 'ar' ? `${num(h,lang)}س` : `${h}h`);
+  const mmStr = String(mm).padStart(2,'0');
+  const zero = lang === 'fa' ? '۰' : (lang === 'ar' ? '٠' : '0');
+  return `${num(h,lang)}:${num(Number(mmStr), lang).padStart(2, zero)}`;
 }
 function fmtHM(m, lang) {
   const h = Math.floor(m/60), mm = m%60;
-  if (!m) return '';
-  return `${num(h,lang)}:${String(mm).padStart(2,'0')}`;
+  const mmStr = String(mm).padStart(2,'0');
+  const zero = lang === 'fa' ? '۰' : (lang === 'ar' ? '٠' : '0');
+  return `${num(h,lang)}:${num(Number(mmStr), lang).padStart(2, zero)}`;
 }
 
 function hexToRgb(hex) {
@@ -1555,10 +1590,10 @@ function renderHero() {
   const target = state.dailyTargets[today()]?.total || 0;
   const L = t();
   $('heroLbl').textContent = L.todayStudy;
-  animateNumber($('heroNum'), total, state.user.lang);
-  $('heroUnit').textContent = L.min;
-  const hm = fmtHM(total, state.user.lang);
-  $('heroHM').textContent = hm ? `(${hm})` : '';
+  // Big number = H:MM (animated on underlying total minutes)
+  animateHM($('heroNum'), total, state.user.lang);
+  // Small = total minutes in parentheses
+  $('heroHM').textContent = `(${num(total, state.user.lang)} ${L.min})`;
   $('editTarget').textContent = L.editTarget;
 
   const pct = target > 0 ? Math.min(100, (total / target) * 100) : 0;
@@ -1597,6 +1632,25 @@ function renderHero() {
     sub.textContent = L.targetRemain(num(target, state.user.lang), num(target - total, state.user.lang));
     bar.style.width = pct + '%';
   }
+}
+
+/* Animate the hero big number as H:MM (on the underlying total minutes). */
+function animateHM(el, to, lang) {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  const from = displayedNum;
+  if (from === to) { el.textContent = fmtHM(to, lang); return; }
+  const dur = 700;
+  const t0 = performance.now();
+  const step = (tt) => {
+    const p = Math.min(1, (tt - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 4);
+    const current = Math.round(from + (to - from) * eased);
+    el.textContent = fmtHM(current, lang);
+    if (p < 1) animFrame = requestAnimationFrame(step);
+    else displayedNum = to;
+  };
+  animFrame = requestAnimationFrame(step);
+  displayedNum = to;
 }
 
 function animateNumber(el, to, lang) {
@@ -2364,17 +2418,101 @@ function toast(msg, type, undo) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'undo'; b.textContent = t().undo;
-    b.addEventListener('click', () => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
       state.sessions = state.sessions.filter(s => s.id !== lastAct.id);
       lastAct = null;
       save(); renderAll();
       if (openSubjId) openSubjPanel(openSubjId);
-      el.classList.remove('show');
+      dismissToast(el);
     });
     el.appendChild(b);
   }
+  bindToastDismiss(el);
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), undo ? 5000 : 2500);
+  el._t = setTimeout(() => dismissToast(el), undo ? 5000 : 2500);
+}
+
+/* Close a toast and clean up any swipe listeners on it. */
+function dismissToast(el) {
+  el.classList.remove('show');
+  clearTimeout(el._t);
+  el._t = null;
+  el._cleanupSwipe?.();
+  el._cleanupSwipe = null;
+}
+
+/* Attach tap + swipe dismissal to a toast element (idempotent per show). */
+function bindToastDismiss(el) {
+  el._cleanupSwipe?.();
+  el._cleanupSwipe = null;
+
+  // --- Tap to dismiss (ignore taps on interactive children like .undo) ---
+  const onTap = (e) => {
+    if (e.target.closest('.undo')) return;
+    dismissToast(el);
+  };
+  el.addEventListener('click', onTap);
+  el._cleanupSwipe = () => el.removeEventListener('click', onTap);
+
+  // --- Swipe to dismiss (touch + pointer, any direction) ---
+  let startX = 0, startY = 0, startT = 0, tracking = false, swiped = false;
+  const THRESHOLD = 30; // px
+  const MAX_TIME = 800; // ms
+
+  const begin = (x, y) => { startX = x; startY = y; startT = Date.now(); tracking = true; swiped = false; };
+  const move = (x, y) => {
+    if (!tracking) return;
+    const dx = x - startX, dy = y - startY;
+    if (Math.abs(dx) + Math.abs(dy) > THRESHOLD) swiped = true;
+  };
+  const end = () => {
+    if (!tracking) return;
+    tracking = false;
+    if (swiped && Date.now() - startT < MAX_TIME) {
+      dismissToast(el);
+    }
+    swiped = false;
+  };
+
+  const onTouchStart = (e) => {
+    const t = e.touches[0]; if (!t) return;
+    begin(t.clientX, t.clientY);
+  };
+  const onTouchMove = (e) => {
+    const t = e.touches[0]; if (!t) return;
+    move(t.clientX, t.clientY);
+  };
+  const onTouchEnd = () => end();
+
+  const onPointerDown = (e) => {
+    // Only track if pointer is not a mouse click on .undo (already handled by tap)
+    if (e.pointerType === 'mouse') begin(e.clientX, e.clientY);
+  };
+  const onPointerMove = (e) => {
+    if (e.pointerType === 'mouse') move(e.clientX, e.clientY);
+  };
+  const onPointerUp = (e) => {
+    if (e.pointerType === 'mouse') end();
+  };
+
+  el.addEventListener('touchstart', onTouchStart, { passive: true });
+  el.addEventListener('touchmove', onTouchMove, { passive: true });
+  el.addEventListener('touchend', onTouchEnd, { passive: true });
+  el.addEventListener('pointerdown', onPointerDown);
+  el.addEventListener('pointermove', onPointerMove);
+  el.addEventListener('pointerup', onPointerUp);
+
+  const prev = el._cleanupSwipe;
+  el._cleanupSwipe = () => {
+    prev?.();
+    el.removeEventListener('touchstart', onTouchStart);
+    el.removeEventListener('touchmove', onTouchMove);
+    el.removeEventListener('touchend', onTouchEnd);
+    el.removeEventListener('pointerdown', onPointerDown);
+    el.removeEventListener('pointermove', onPointerMove);
+    el.removeEventListener('pointerup', onPointerUp);
+  };
 }
 
 /* ============================================================
