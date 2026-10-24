@@ -682,6 +682,10 @@ input,select{font-family:var(--font);font-size:inherit}
       <div class="field"><label for="editHIn" id="editHL">Hours</label><input type="number" id="editHIn" min="0" max="23" value="0" inputmode="numeric" spellcheck="false"></div>
       <div class="field"><label for="editMIn" id="editML">Minutes</label><input type="number" id="editMIn" min="0" max="59" value="0" inputmode="numeric" spellcheck="false"></div>
     </div>
+    <div class="field">
+      <label for="editNote" id="editNoteL">Note</label>
+      <textarea id="editNote" maxlength="200" rows="2" placeholder="" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:.92rem;font-family:var(--font);resize:vertical;min-height:60px"></textarea>
+    </div>
     <div class="form-error" id="editErr" role="alert"></div>
     <div class="macts">
       <button type="button" class="btn btn-danger" id="editDelBtn">Delete</button>
@@ -713,9 +717,11 @@ input,select{font-family:var(--font);font-size:inherit}
 /* ============================================================
    Constants
    ============================================================ */
-const APP_VERSION = 8;
-const STORAGE_KEY = 'leaf_v8';
-const BACKUP_KEY = 'leaf_backup_v8';
+const APP_VERSION = 9;
+const STORAGE_KEY = 'leaf_v9';
+const BACKUP_KEY = 'leaf_backup_v9';
+const LEGACY_STORAGE_KEYS = ['leaf_v8', 'leaf_v7', 'leaf_v6'];
+const LEGACY_BACKUP_KEYS = ['leaf_backup_v8', 'leaf_backup_v7', 'leaf_backup_v6'];
 const RESET_FLAG = 'leaf_resetting';
 const MAX_DAILY_MINUTES = 24 * 60;
 const MAX_NEAR_LIMIT = MAX_DAILY_MINUTES - 60;
@@ -789,7 +795,8 @@ This journal is yours alone. No account, no server, no internet. Here, your data
     closePanel:'Close', editSessionBtn:'Edit session',
     defSubj1:'Math', defSubj2:'English',
     csvNoData:'No data to export',
-    csvHeader:'Date,Subject,Duration (min)\n',
+    csvHeader:'Date,Subject,Duration (min)',
+    csvNoteHeader:',Note\n',
     importCsv:'Import CSV',
     importCsvTitle:'Import CSV',
     importCsvHint:'Expected columns: Date (YYYY-MM-DD), Subject, Duration (min). New subjects will be created automatically.',
@@ -797,6 +804,9 @@ This journal is yours alone. No account, no server, no internet. Here, your data
     importCsvDone:(s)=>`${s} session(s) imported.`,
     importCsvNone:'No valid rows found in the file.',
     importCsvInvalid:'Could not read the CSV file.',
+    noteLabel:'Note',
+    notePlaceholder:'Optional — e.g. Chapter 3, exercises 1–5',
+    noteTooLong:'Note must be 200 characters or less.',
     chartUnavailable:'Chart library unavailable — statistics hidden.',
     nameTaken:'This subject name already exists.',
     chartMissing:'Charts unavailable',
@@ -861,7 +871,8 @@ weekRange:(a,b)=>`Week: ${a} to ${b}`,
     closePanel:'بستن', editSessionBtn:'ویرایش جلسه',
     defSubj1:'ریاضی', defSubj2:'انگلیسی',
     csvNoData:'داده‌ای برای خروجی نیست',
-    csvHeader:'تاریخ,درس,مدت (دقیقه)\n',
+    csvHeader:'تاریخ,درس,مدت (دقیقه)',
+    csvNoteHeader:',یادداشت\n',
     importCsv:'ایمپورت CSV',
     importCsvTitle:'ایمپورت CSV',
     importCsvHint:'ستون‌های مورد انتظار: تاریخ (YYYY-MM-DD)، درس، مدت (دقیقه). درس‌های جدید خودکار ساخته می‌شوند.',
@@ -869,6 +880,9 @@ weekRange:(a,b)=>`Week: ${a} to ${b}`,
     importCsvDone:(s)=>`${s} جلسه ایمپورت شد.`,
     importCsvNone:'هیچ ردیف معتبری در فایل پیدا نشد.',
     importCsvInvalid:'خواندن فایل CSV ممکن نشد.',
+    noteLabel:'یادداشت',
+    notePlaceholder:'اختیاری — مثلاً فصل ۳، تمرین ۱ تا ۵',
+    noteTooLong:'یادداشت باید حداکثر ۲۰۰ کاراکتر باشد.',
     chartUnavailable:'کتابخانه نمودار در دسترس نیست — آمار پنهان شد.',
     nameTaken:'این نام درس قبلاً وجود داره.',
     chartMissing:'نمودارها در دسترس نیستن',
@@ -933,7 +947,8 @@ weekRange:(a,b)=>`هفته: ${a} تا ${b}`,
     closePanel:'إغلاق', editSessionBtn:'تعديل الجلسة',
     defSubj1:'الرياضيات', defSubj2:'الإنجليزية',
     csvNoData:'لا توجد بيانات للتصدير',
-    csvHeader:'التاريخ,المادة,المدة (دقيقة)\n',
+    csvHeader:'التاريخ,المادة,المدة (دقيقة)',
+    csvNoteHeader:',ملاحظة\n',
     importCsv:'استيراد CSV',
     importCsvTitle:'استيراد CSV',
     importCsvHint:'الأعمدة المتوقعة: التاريخ (YYYY-MM-DD)، المادة، المدة (دقيقة). ستُنشأ المواد الجديدة تلقائياً.',
@@ -941,6 +956,9 @@ weekRange:(a,b)=>`هفته: ${a} تا ${b}`,
     importCsvDone:(s)=>`تم استيراد ${s} جلسة.`,
     importCsvNone:'لم يتم العثور على صفوف صالحة في الملف.',
     importCsvInvalid:'تعذّر قراءة ملف CSV.',
+    noteLabel:'ملاحظة',
+    notePlaceholder:'اختياري — مثلاً الفصل ٣، التمارين ١–٥',
+    noteTooLong:'يجب ألا تتجاوز الملاحظة ٢٠٠ حرف.',
     chartUnavailable:'مكتبة الرسوم غير متوفرة — الإحصائيات مخفية.',
     nameTaken:'اسم المادة موجود مسبقاً.',
     chartMissing:'الرسوم غير متوفرة',
@@ -1197,6 +1215,7 @@ function sanitizeState(parsed) {
     durationMinutes: clamp(toInt(s.durationMinutes), 1, MAX_DAILY_MINUTES),
     date: /^\d{4}-\d{2}-\d{2}$/.test(s.date || '') ? s.date : today(),
     createdAt: toInt(s.createdAt) || Date.now(),
+    note: typeof s.note === 'string' ? s.note.slice(0, 200) : '',
   })).filter(s => s.subjectId && merged.subjects.some(x => x.id === s.subjectId));
   merged.dailyTargets = (parsed.dailyTargets && typeof parsed.dailyTargets === 'object') ? parsed.dailyTargets : {};
   merged.weeklyGoals = (parsed.weeklyGoals && typeof parsed.weeklyGoals === 'object') ? parsed.weeklyGoals : {};
@@ -1210,22 +1229,25 @@ function sanitizeState(parsed) {
 function load() {
   try {
     if (isResettingNow()) return defaultState('en');
-    // Try current version key first, then legacy v7/v6
-    for (const k of [STORAGE_KEY, 'leaf_v7', 'leaf_v6']) {
+    // Try current key, then all legacy keys (v8, v7, v6)
+    for (const k of [STORAGE_KEY, ...LEGACY_STORAGE_KEYS]) {
       const raw = localStorage.getItem(k);
       if (raw) {
         const p = safeParse(raw);
         if (p && p.subjects && p.sessions) return sanitizeState(p);
       }
     }
-    const backupsRaw = localStorage.getItem(BACKUP_KEY) || localStorage.getItem('leaf_backup_v7') || localStorage.getItem('leaf_backup_v6');
-    const backups = safeParse(backupsRaw);
-    if (Array.isArray(backups) && backups.length) {
-      const last = backups[backups.length - 1];
-      if (last && last.data && last.data.subjects) {
-        const merged = sanitizeState(last.data);
-        setTimeout(() => { try { toast(I18N[merged.user.lang]?.backupRestored || 'Recovered', 'success'); } catch(_){} }, 800);
-        return merged;
+    // Fall back to the newest available rolling backup
+    for (const k of [BACKUP_KEY, ...LEGACY_BACKUP_KEYS]) {
+      const backupsRaw = localStorage.getItem(k);
+      const backups = safeParse(backupsRaw);
+      if (Array.isArray(backups) && backups.length) {
+        const last = backups[backups.length - 1];
+        if (last && last.data && last.data.subjects) {
+          const merged = sanitizeState(last.data);
+          setTimeout(() => { try { toast(I18N[merged.user.lang]?.backupRestored || 'Recovered', 'success'); } catch(_){} }, 800);
+          return merged;
+        }
       }
     }
   } catch(e) { console.warn(e); }
@@ -1958,6 +1980,9 @@ function openEditModal(sessionId) {
   }
   $('editHIn').value = Math.floor(s.durationMinutes / 60);
   $('editMIn').value = s.durationMinutes % 60;
+  $('editNote').value = s.note || '';
+  $('editNoteL').textContent = L.noteLabel;
+  $('editNote').placeholder = L.notePlaceholder;
   openModal('editM');
   setTimeout(() => $('editHIn').focus(), 80);
 }
@@ -1985,9 +2010,11 @@ function saveEditedSession() {
   const allowed = MAX_DAILY_MINUTES - dayTotalExcluding;
   if (newMin > allowed) { editError(t().overLimit(num(Math.max(0, allowed), state.user.lang))); return; }
 
+  const note = ($('editNote').value || '').trim().slice(0, 200);
   const subjectChanged = newSubId !== s.subjectId;
   s.subjectId = newSubId;
   s.durationMinutes = newMin;
+  s.note = note;
   save();
   closeEditModal();
   renderAll();
@@ -2338,7 +2365,7 @@ function addSession(min, id) {
   if (!min || min <= 0) return ferr(t().needMin);
   const remaining = MAX_DAILY_MINUTES - todayTotal();
   if (min > remaining) return ferr(t().overLimit(num(remaining, state.user.lang)));
-  const s = { id: cryptoId(), subjectId: id, durationMinutes: min, date: today(), createdAt: Date.now() };
+  const s = { id: cryptoId(), subjectId: id, durationMinutes: min, date: today(), createdAt: Date.now(), note: '' };
   state.sessions.push(s);
   state.selectedSubjectId = id;
   save();
@@ -2394,11 +2421,11 @@ function csvEscape(v) {
 function exportCSV() {
   const sessions = [...state.sessions].sort((a,b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
   if (!sessions.length) { toast(t().csvNoData, 'error'); return; }
-  let csv = t().csvHeader;
+  let csv = t().csvHeader + t().csvNoteHeader;
   sessions.forEach(s => {
     const sub = state.subjects.find(x => x.id === s.subjectId);
     const name = sub?.name || '—';
-    csv += `${csvEscape(s.date)},${csvEscape(name)},${s.durationMinutes}\n`;
+    csv += `${csvEscape(s.date)},${csvEscape(name)},${s.durationMinutes},${csvEscape(s.note || '')}\n`;
   });
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
