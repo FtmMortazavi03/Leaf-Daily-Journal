@@ -347,7 +347,61 @@ input,select{font-family:var(--font);font-size:inherit}
   .stat .v{font-size:1.2rem}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+
+/* ============================================================
+   THEME-SPECIFIC VISUAL EFFECTS (Colors + Motion)
+   ============================================================ */
+
+/* 1. یه هاله‌ی رنگی ملایم توی پس‌زمینه‌ی کل اپ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 10% 20%, var(--accent), transparent 40%),
+              radial-gradient(circle at 90% 80%, var(--accent), transparent 40%);
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.5s ease, background 0.5s ease;
+}
+
+/* 2. کارت‌ها یه سایه‌ی رنگی خیلی ملایم می‌گیرن */
+.hero, .dock, .subject-panel, .wgoal, .heatmap-card {
+  box-shadow: 0 4px 20px -4px var(--accent-soft), 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* 3. وقتی روی کارت‌ها کلیک می‌کنی، یه درخشش ظریف */
+.hero:hover, .dock:hover {
+  box-shadow: 0 8px 30px -4px var(--accent-soft), 0 1px 3px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+}
+
+/* 4. دکمه‌های اصلی، با رنگ تم هماهنگ می‌شن */
+.btn-primary, .manual-submit, .quick-btn:hover, .nav-btn.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 5. هاله‌ی دور عدد هیرو */
+.hero-number {
+  text-shadow: 0 0 20px var(--accent-soft);
+  transition: text-shadow 0.4s ease;
+}
+
+/* 6. انیمیشن‌های اختصاصی برای هر رنگ (بر اساس پالت) */
+[data-palette="blue"] .hero-number { text-shadow: 0 0 30px rgba(37, 99, 235, 0.3); }
+[data-palette="green"] .hero-number { text-shadow: 0 0 30px rgba(22, 163, 74, 0.3); }
+[data-palette="red"] .hero-number { text-shadow: 0 0 30px rgba(220, 38, 38, 0.3); }
+[data-palette="purple"] .hero-number { text-shadow: 0 0 30px rgba(147, 51, 234, 0.3); }
+[data-palette="orange"] .hero-number { text-shadow: 0 0 30px rgba(234, 88, 12, 0.3); }
+[data-palette="teal"] .hero-number { text-shadow: 0 0 30px rgba(13, 148, 136, 0.3); }
+[data-palette="pink"] .hero-number { text-shadow: 0 0 30px rgba(219, 39, 119, 0.3); }
+
 </style>
+<link rel="stylesheet" href="./premium-effects.css">
+<link rel="stylesheet" href="./effects.css">
 </head>
 <body>
 
@@ -1313,6 +1367,7 @@ function applyTheme() {
   r.style.setProperty('--accent-soft', `rgba(${rgb.r},${rgb.g},${rgb.b},0.12)`);
   r.style.setProperty('--accent-text', isLight(p.color) ? '#18181b' : '#ffffff');
   r.setAttribute('data-theme', mode);
+  r.setAttribute('data-palette', palette);
   r.setAttribute('lang', lang);
   r.setAttribute('dir', (lang === 'fa' || lang === 'ar') ? 'rtl' : 'ltr');
   const meta = $('metaTheme');
@@ -2051,23 +2106,37 @@ async function deleteEditedSession() {
    ============================================================ */
 function renderStats() {
   const L = t();
-  $('stToday').textContent = num(todayTotal(), state.user.lang);
-  $('stWeek').textContent = num(weekTotal(), state.user.lang);
-  $('stMonth').textContent = num(monthTotal(), state.user.lang);
+  const lang = state.user.lang;
+
+  // تابع کمکی: تبدیل دقیقه به فرمت ساعت:دقیقه (مثلاً 1:15)
+  const fmtStat = (mins) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (m === 0) return num(h, lang) + ':00';
+    // استفاده از صفر برای دقیقه‌های تک رقمی (مثلاً 1:05)
+    const mStr = String(m).padStart(2, '0');
+    return num(h, lang) + ':' + num(Number(mStr), lang).padStart(2, lang === 'fa' ? '۰' : (lang === 'ar' ? '٠' : '0'));
+  };
+
+  $('stToday').textContent = fmtStat(todayTotal());
+  $('stWeek').textContent = fmtStat(weekTotal());
+  $('stMonth').textContent = fmtStat(monthTotal());
   $('stTodayL').textContent = L.stToday;
   $('stWeekL').textContent = L.stWeek;
   $('stMonthL').textContent = L.stMonth;
+
   let sum = 0;
   for (let i = 0; i < 7; i++) sum += totalFor(daysAgo(i));
-  $('stAvg').textContent = num(Math.round(sum/7), state.user.lang);
+  $('stAvg').textContent = fmtStat(Math.round(sum / 7));
   $('stAvgL').textContent = L.stAvg;
+
   let streak = 0;
   for (let i = 0; i < 400; i++) {
     const k = daysAgo(i);
     if (totalFor(k) > 0) streak++;
     else break;
   }
-  $('stStreak').textContent = num(streak, state.user.lang);
+  $('stStreak').textContent = num(streak, lang);
   $('stStreakL').textContent = L.stStreak;
 }
 
