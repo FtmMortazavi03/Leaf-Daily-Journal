@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>تست هیت‌مپ</title>
+</head>
+<body style="background: #222; color: white; padding: 20px; direction: ltr;">
+    <h2>تست هیت‌مپ (کد جدید)</h2>
+    <div id="heatmapGrid" style="display: flex; gap: 3px;"></div>
+
+    <script>
+        // این فقط یه شبیه‌سازی از کد جدید توئه که مستقیم توی مرورگر اجرا میشه
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.direction = 'ltr';
+        
+        const months = ['آبان', 'آذر', 'دی', 'بهمن', 'اسفند', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان'];
+        
+        months.forEach((m, i) => {
+            const col = document.createElement('div');
+            col.style.display = 'flex';
+            col.style.flexDirection = 'column';
+            col.style.alignItems = 'center';
+            
+            const label = document.createElement('div');
+            label.textContent = m;
+            label.style.writingMode = 'vertical-rl';
+            label.style.transform = 'rotate(180deg)';
+            label.style.height = '60px';
+            
+            const cell = document.createElement('div');
+            cell.style.width = '12px';
+            cell.style.height = '12px';
+            cell.style.background = i === months.length - 1 ? '#16a34a' : '#333';
+            cell.style.marginTop = '5px';
+            
+            col.appendChild(label);
+            col.appendChild(cell);
+            wrapper.appendChild(col);
+        });
+        
+        document.getElementById('heatmapGrid').appendChild(wrapper);
+    </script>
+</body>
+</html>

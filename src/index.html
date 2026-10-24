@@ -252,66 +252,25 @@ input,select{font-family:var(--font);font-size:inherit}
 .litem .dot{width:8px;height:8px;border-radius:50%}
 
 .wgoal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
-.wgoal h3{font-size:.9rem;font-weight:600;margin-bottom:14px;color:var(--muted)}
-.winput{display:flex;gap:8px;align-items:center}
-.winput input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:1rem;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
-.winput input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.winput .unit{font-size:.82rem;color:var(--muted)}
-.winput button{padding:12px 18px;border-radius:10px;background:var(--accent);color:var(--accent-text);font-weight:700;font-size:.85rem;transition:.2s}
-.winput button:hover{opacity:.9;transform:translateY(-1px)}
-.wprog{margin-top:14px}
-.wrow{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;font-variant-numeric:tabular-nums}
 
-/* SETTINGS */
-.set-group{margin-bottom:24px}
-.set-group h3{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:14px}
-.set-row:last-child{border-bottom:none}
-.set-row label{font-size:.9rem;font-weight:500}
-.set-row select,.set-row input[type=text]{padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:.88rem;max-width:180px;transition:.2s}
-.set-row select:focus,.set-row input:focus{outline:none;border-color:var(--accent)}
-.switch{position:relative;width:44px;height:26px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;transition:.2s;flex-shrink:0}
-.switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);transition:.2s}
-.switch.on{background:var(--accent);border-color:var(--accent)}
-.switch.on::after{left:20px;border-color:var(--accent);background:var(--accent-text)}
-.prow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.pdot{width:32px;height:32px;border-radius:50%;border:2px solid transparent;transition:.2s;cursor:pointer;position:relative}
-.pdot:hover{transform:scale(1.12)}
-.pdot.sel{border-color:var(--text);box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--accent)}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap}
-.btn{padding:12px 18px;border-radius:10px;font-size:.88rem;font-weight:600;transition:.2s}
-.btn-primary{background:var(--accent);color:var(--accent-text)}
-.btn-primary:hover{opacity:.9}
-.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
-.btn-ghost:hover{background:var(--surface2);border-color:var(--border2)}
-.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--border)}
-.btn-danger:hover{background:rgba(220,38,38,.08);border-color:var(--danger)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-
-.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:12px}
-.scard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative;transition:.2s}
-.scard:hover{border-color:var(--border2)}
-.shead{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-inline-end:20px}
-.shead .n{font-weight:600;font-size:.85rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sstats{font-size:.72rem;color:var(--muted);line-height:1.6;font-variant-numeric:tabular-nums}
-.sstats b{color:var(--text)}
-.sdel{position:absolute;top:6px;inset-inline-end:6px;width:20px;height:20px;border-radius:50%;color:var(--dim);font-size:.7rem;display:grid;place-items:center;transition:.15s}
-.sdel:hover{background:var(--surface2);color:var(--danger)}
-.igroup{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
-@media(min-width:480px){.igroup{grid-template-columns:2fr 1fr auto auto}}
-.igroup input[type=text],.igroup input[type=number]{padding:12px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:.9rem}
-.igroup input:focus{outline:none;border-color:var(--accent)}
-.igroup input[type=number]{text-align:center;font-weight:700;-moz-appearance:textfield;appearance:textfield}
-.igroup input[type=number]::-webkit-outer-spin-button,.igroup input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.cpick{width:44px;height:42px;border-radius:10px;border:1px solid var(--border2);background:transparent;padding:0;cursor:pointer}
-.cpick::-webkit-color-swatch-wrapper{padding:2px}
-.cpick::-webkit-color-swatch{border:none;border-radius:6px}
-
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 14px;max-width:720px;margin:0 auto}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;color:var(--muted);font-size:.68rem;font-weight:500;transition:.2s;position:relative}
-.nav-btn .ico{width:22px;height:22px}
-.nav-btn.active{color:var(--accent)}
-.nav-btn.active::after{content:'';position:absolute;bottom:-2px;width:16px;height:2px;border-radius:2px;background:var(--accent)}
+/* Heatmap */
+.heatmap-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.heatmap-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.heatmap-head h3{font-size:.9rem;font-weight:600;color:var(--muted);margin:0}
+.heatmap-head .sub{font-size:.75rem;color:var(--dim)}
+.heatmap-scroll{overflow-x:hidden;width:100%;padding-bottom:6px;direction:ltr;}
+.heatmap-wrapper{display:flex;flex-direction:row;gap:2px;width:100%;direction:ltr;justify-content:space-between;}
+.heatmap-week-col{display:flex;flex-direction:column;gap:2px;align-items:center;flex:1;}
+.heatmap-cells-col{display:flex;flex-direction:column;gap:2px;width:100%;}
+.heatmap-cell{width:100%;aspect-ratio:1;border-radius:2px;background:var(--surface2);transition:transform .15s;}
+.heatmap-cell:hover{transform:scale(1.4);outline:1px solid var(--text);outline-offset:1px;cursor:pointer;z-index:2;position:relative;}
+.heatmap-cell[data-lvl="0"]{background:var(--surface2);}
+.heatmap-cell[data-lvl="1"]{background:color-mix(in srgb, var(--success) 25%, var(--surface2));}
+.heatmap-cell[data-lvl="2"]{background:color-mix(in srgb, var(--success) 50%, var(--surface2));}
+.heatmap-cell[data-lvl="3"]{background:color-mix(in srgb, var(--success) 75%, var(--surface2));}
+.heatmap-cell[data-lvl="4"]{background:var(--success);}
+.heatmap-legend{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:.72rem;color:var(--dim);justify-content:flex-end;}
+.heatmap-legend .cell{width:12px;height:12px;border-radius:2px;}
 
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:999;padding:20px;overflow-y:auto}
 .mbg.show{display:flex}
@@ -345,6 +304,13 @@ input,select{font-family:var(--font);font-size:inherit}
 /* Confirm modal */
 .confirm-modal .macts{justify-content:flex-end;margin-top:20px;gap:10px}
 .confirm-modal p{font-size:.9rem;color:var(--text);margin-bottom:0}
+
+
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 14px;max-width:720px;margin:0 auto}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;color:var(--muted);font-size:.68rem;font-weight:500;transition:.2s;position:relative}
+.nav-btn .ico{width:22px;height:22px}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.active::after{content:'';position:absolute;bottom:-2px;width:16px;height:2px;border-radius:2px;background:var(--accent)}
 
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(200px);background:var(--accent);color:var(--accent-text);padding:12px 18px;border-radius:12px;font-weight:600;font-size:.85rem;transition:transform .3s ease, opacity .3s ease;opacity:0;pointer-events:none;z-index:1000;max-width:90vw;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
@@ -560,6 +526,25 @@ input,select{font-family:var(--font);font-size:inherit}
         <div class="bar"><div class="bar-fill" id="wPFill"></div></div>
         <div class="wrow" style="margin-top:12px;margin-bottom:0"><span id="wDoneLbl">Done</span><b id="wDoneVal">0</b></div>
         <div class="wrow" style="margin-bottom:0"><span id="wRemLbl">Remaining</span><b id="wRemVal">0</b></div>
+      </div>
+    </div>
+
+    <div class="heatmap-card">
+      <div class="heatmap-head">
+        <h3 id="heatmapTitle">Study heatmap</h3>
+        <span class="sub" id="heatmapSub">Last 365 days</span>
+      </div>
+      <div class="heatmap-scroll" dir="ltr">
+        <div class="heatmap-grid" id="heatmapGrid" dir="ltr"></div>
+      </div>
+      <div class="heatmap-legend">
+        <span id="heatmapLess">Less</span>
+        <span class="cell" data-lvl="0"></span>
+        <span class="cell" data-lvl="1"></span>
+        <span class="cell" data-lvl="2"></span>
+        <span class="cell" data-lvl="3"></span>
+        <span class="cell" data-lvl="4"></span>
+        <span id="heatmapMore">More</span>
       </div>
     </div>
 
@@ -807,6 +792,11 @@ This journal is yours alone. No account, no server, no internet. Here, your data
     noteLabel:'Note',
     notePlaceholder:'Optional — e.g. Chapter 3, exercises 1–5',
     noteTooLong:'Note must be 200 characters or less.',
+    heatmapTitle:'Study heatmap',
+    heatmapSub:'Last 365 days',
+    heatmapLess:'Less',
+    heatmapMore:'More',
+    heatmapTooltip:(d,m)=>`${d} — ${m} min`,
     chartUnavailable:'Chart library unavailable — statistics hidden.',
     nameTaken:'This subject name already exists.',
     chartMissing:'Charts unavailable',
@@ -883,6 +873,11 @@ weekRange:(a,b)=>`Week: ${a} to ${b}`,
     noteLabel:'یادداشت',
     notePlaceholder:'اختیاری — مثلاً فصل ۳، تمرین ۱ تا ۵',
     noteTooLong:'یادداشت باید حداکثر ۲۰۰ کاراکتر باشد.',
+    heatmapTitle:'نقشه حرارتی مطالعه',
+    heatmapSub:'۳۶۵ روز اخیر',
+    heatmapLess:'کمتر',
+    heatmapMore:'بیشتر',
+    heatmapTooltip:(d,m)=>`${d} — ${m} دقیقه`,
     chartUnavailable:'کتابخانه نمودار در دسترس نیست — آمار پنهان شد.',
     nameTaken:'این نام درس قبلاً وجود داره.',
     chartMissing:'نمودارها در دسترس نیستن',
@@ -959,6 +954,11 @@ weekRange:(a,b)=>`هفته: ${a} تا ${b}`,
     noteLabel:'ملاحظة',
     notePlaceholder:'اختياري — مثلاً الفصل ٣، التمارين ١–٥',
     noteTooLong:'يجب ألا تتجاوز الملاحظة ٢٠٠ حرف.',
+    heatmapTitle:'خريطة حرارية للدراسة',
+    heatmapSub:'آخر ٣٦٥ يوماً',
+    heatmapLess:'أقل',
+    heatmapMore:'أكثر',
+    heatmapTooltip:(d,m)=>`${d} — ${m} دقيقة`,
     chartUnavailable:'مكتبة الرسوم غير متوفرة — الإحصائيات مخفية.',
     nameTaken:'اسم المادة موجود مسبقاً.',
     chartMissing:'الرسوم غير متوفرة',
@@ -1602,7 +1602,7 @@ const t = () => I18N[state.user.lang] || I18N.en;
 function renderAll() {
   renderGreeting(); renderDates(); renderHero();
   renderDock(); renderTodaySess();
-  renderStats(); renderTrend(); renderDonut(); renderWeek();
+  renderStats(); renderTrend(); renderDonut(); renderHeatmap(); renderWeek();
   renderLabels(); renderFooter(); renderSubjGrid(); renderSettings();
   renderWeekBadge();
   if (curScreen === 'history') renderHistory();
@@ -2127,6 +2127,80 @@ function renderDonut() {
   });
 }
 
+function renderHeatmap() {
+  const grid = $('heatmapGrid');
+  if (!grid) return;
+  
+  const L = t();
+  $('heatmapTitle').textContent = L.heatmapTitle;
+  $('heatmapSub').textContent = L.heatmapSub;
+  $('heatmapLess').textContent = L.heatmapLess;
+  $('heatmapMore').textContent = L.heatmapMore;
+
+  const totals = {};
+  const now = new Date();
+  
+  const start = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+  const offset = (start.getDay() - SATURDAY_DOW + 7) % 7;
+  start.setDate(start.getDate() - offset);
+
+  state.sessions.forEach(s => {
+    if (s.date >= dateKey(start) && s.date <= today()) {
+      totals[s.date] = (totals[s.date] || 0) + s.durationMinutes;
+    }
+  });
+
+  const vals = Object.values(totals).filter(v => v > 0).sort((a,b) => a-b);
+  const t1 = vals.length ? vals[Math.floor(vals.length * 0.25)] : 15;
+  const t2 = vals.length ? vals[Math.floor(vals.length * 0.50)] : 45;
+  const t3 = vals.length ? vals[Math.floor(vals.length * 0.75)] : 90;
+  const level = (m) => {
+    if (!m) return 0;
+    if (m <= t1) return 1;
+    if (m <= t2) return 2;
+    if (m <= t3) return 3;
+    return 4;
+  };
+
+  grid.innerHTML = '';
+  
+  const wrapper = document.createElement('div');
+  wrapper.className = 'heatmap-wrapper';
+  wrapper.style.direction = 'ltr';
+  grid.appendChild(wrapper);
+
+  const totalDays = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - start) / 86400000) + 1;
+  const weeks = Math.ceil(totalDays / 7);
+
+  for (let w = 0; w < weeks; w++) {
+    const col = document.createElement('div');
+    col.className = 'heatmap-week-col';
+
+    // حذف کامل لیبل ماه
+    const cellsCol = document.createElement('div');
+    cellsCol.className = 'heatmap-cells-col';
+    for (let d = 0; d < 7; d++) {
+      const dayOffset = w * 7 + d;
+      const dt = new Date(start.getFullYear(), start.getMonth(), start.getDate() + dayOffset);
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-cell';
+      if (dt > now) {
+        cell.style.visibility = 'hidden';
+      } else {
+        const key = dateKey(dt);
+        const mins = totals[key] || 0;
+        const lvl = level(mins);
+        cell.setAttribute('data-lvl', lvl);
+        cell.setAttribute('title', L.heatmapTooltip(fmtDate(dt, state.user.lang, state.user.cal), num(mins, state.user.lang)));
+        cell.setAttribute('aria-label', L.heatmapTooltip(fmtDate(dt, state.user.lang, state.user.cal), num(mins, state.user.lang)));
+        cell.tabIndex = 0;
+      }
+      cellsCol.appendChild(cell);
+    }
+    col.appendChild(cellsCol);
+    wrapper.appendChild(col);
+  }
+}
 function renderWeek() {
   const wk = weekKey();
   const goal = state.weeklyGoals[wk];
@@ -2709,12 +2783,13 @@ initOB();
 
 })();
 </script>
+<!-- SW disabled for dev — run enable_sw.py to restore -->
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-  });
-}
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+//   });
+// }
 </script>
 </body>
 </html>
