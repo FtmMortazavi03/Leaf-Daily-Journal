@@ -3284,5 +3284,162 @@ window.addEventListener('load', function() {
 });
 </script>
 
+
+<script>
+window.addEventListener('load', function() {
+  function fixTranslations() {
+    var lang = document.documentElement.getAttribute('lang') || 'en';
+    
+    // دیکشنری ترجمه کلمات
+    var dict = {
+      'fa': { 
+        backup: 'پشتیبان‌گیری', 
+        restore: 'بازیابی', 
+        hours: 'ساعت', 
+        mins: 'دقیقه',
+        data: 'پشتیبان‌گیری و بازیابی'
+      },
+      'en': { 
+        backup: 'Backup', 
+        restore: 'Restore', 
+        hours: 'Hours', 
+        mins: 'Mins',
+        data: 'Backup & Restore'
+      },
+      'ar': { 
+        backup: 'نسخ احتياطي', 
+        restore: 'استعادة', 
+        hours: 'ساعات', 
+        mins: 'دقائق',
+        data: 'نسخ احتياطي واستعادة'
+      }
+    };
+    
+    var t = dict[lang] || dict['en'];
+
+    // ۱. دکمه‌های پشتیبان‌گیری و بازیابی در تنظیمات
+    var expBtn = document.getElementById('exportCsvBtn');
+    if (expBtn) expBtn.textContent = t.backup;
+    
+    var impBtn = document.getElementById('importCsvBtn');
+    if (impBtn) impBtn.textContent = t.restore;
+    
+    // ۲. عنوان بخش داده‌ها
+    var setDataL = document.getElementById('setDataL');
+    if (setDataL) setDataL.textContent = t.data;
+
+    // ۳. برچسب‌های ساعت و دقیقه در همه جا
+    var hmLabels = document.querySelectorAll('[data-hm-lbl]');
+    hmLabels.forEach(function(lbl) {
+      if (lbl.getAttribute('data-hm-lbl') === 'h') {
+        lbl.textContent = t.hours;
+      } else if (lbl.getAttribute('data-hm-lbl') === 'm') {
+        lbl.textContent = t.mins;
+      }
+    });
+    
+    // برای فیلدهای جدیدی که کلاس دارن ولی data-hm-lbl ندارن
+    var allHmBoxes = document.querySelectorAll('.hm-box label');
+    allHmBoxes.forEach(function(lbl) {
+      var txt = lbl.textContent.trim().toLowerCase();
+      if (txt === 'ساعت' || txt === 'hours' || txt === 'ساعات') lbl.textContent = t.hours;
+      if (txt === 'دقیقه' || txt === 'mins' || txt === 'minutes' || txt === 'دقائق') lbl.textContent = t.mins;
+    });
+
+    // ۴. placeholder های بخش درس جدید
+    var newH = document.getElementById('newSubjH');
+    var newM = document.getElementById('newSubjM');
+    if (newH) newH.placeholder = t.hours;
+    if (newM) newM.placeholder = t.mins;
+    
+    var sowNewH = document.getElementById('sowNewH');
+    var sowNewM = document.getElementById('sowNewM');
+    if (sowNewH) sowNewH.placeholder = t.hours;
+    if (sowNewM) sowNewM.placeholder = t.mins;
+  }
+
+  // اجرای اولیه
+  fixTranslations();
+
+  // هر بار که زبان عوض شد، دوباره اجرا کن
+  new MutationObserver(fixTranslations).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['lang']
+  });
+});
+</script>
+
+
+<script>
+window.addEventListener('load', function() {
+  function fixRemainingHint() {
+    var hintEl = document.getElementById('remainingHint');
+    if (!hintEl) return;
+
+    // خوندن متن فعلی و پیدا کردن عدد دقیقه از داخلش
+    // (چون تابع اصلی برنامه این متن رو می‌سازه، ما فقط عدد رو ازش می‌کشیم بیرون)
+    var currentText = hintEl.innerText || hintEl.textContent;
+    
+    // پیدا کردن اعداد فارسی، عربی یا انگلیسی در متن
+    var match = currentText.match(/[0-9۰-۹٠-٩]+/);
+    if (!match) return;
+
+    var numStr = match[0];
+    // تبدیل اعداد فارسی/عربی به انگلیسی برای محاسبه
+    var enNumStr = numStr.replace(/[۰-۹]/g, function(d) { return String.fromCharCode(d.charCodeAt(0) - 1728); })
+                        .replace(/[٠-٩]/g, function(d) { return String.fromCharCode(d.charCodeAt(0) - 1584); });
+    
+    var totalMins = parseInt(enNumStr, 10);
+    if (isNaN(totalMins) || totalMins <= 0) return;
+
+    // استفاده از تابع اصلی برنامه برای فرمت کردن (اگه در دسترس باشه)
+    // اگه نبود، خودمون فرمت می‌کنیم
+    var lang = document.documentElement.getAttribute('lang') || 'en';
+    var h = Math.floor(totalMins / 60);
+    var m = totalMins % 60;
+    
+    var formatted = '';
+    if (typeof window.fmtMin === 'function') {
+      // تابع اصلی برنامه رو صدا می‌زنیم (البته چون توی closure هست، شاید در دسترس نباشه)
+    }
+    
+    // فرمت دستی بر اساس زبان
+    if (lang === 'fa') {
+      var hFa = h.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
+      var mFa = m.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
+      formatted = h > 0 ? (m > 0 ? hFa + ' ساعت و ' + mFa + ' دقیقه' : hFa + ' ساعت') : mFa + ' دقیقه';
+      hintEl.innerHTML = 'امروز تا <b>' + formatted + '</b> دیگه می‌تونی ثبت کنی';
+    } else if (lang === 'ar') {
+      var hAr = h.toString().replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
+      var mAr = m.toString().replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
+      formatted = h > 0 ? (m > 0 ? hAr + ' ساعة و ' + mAr + ' دقيقة' : hAr + ' ساعة') : mAr + ' دقيقة';
+      hintEl.innerHTML = 'يمكنك تسجيل حتى <b>' + formatted + '</b> أخرى اليوم';
+    } else {
+      formatted = h > 0 ? (m > 0 ? h + 'h ' + m + 'm' : h + 'h') : m + 'm';
+      hintEl.innerHTML = 'Up to <b>' + formatted + '</b> more today';
+    }
+  }
+
+  // اجرای اولیه
+  fixRemainingHint();
+
+  // چون متن این بخش پویاست و با هر تغییر آپدیت میشه،
+  // یه مشاهده‌گر (Observer) روی اون می‌ذاریم که هر بار متنش عوض شد، دوباره فرمت کنه
+  var hintEl = document.getElementById('remainingHint');
+  if (hintEl) {
+    var observer = new MutationObserver(function() {
+      fixRemainingHint();
+    });
+    observer.observe(hintEl, { childList: true, characterData: true, subtree: true });
+  }
+
+  // هر بار که زبان عوض شد، دوباره اجرا کن
+  new MutationObserver(fixRemainingHint).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['lang']
+  });
+});
+</script>
+
 </body>
 </html>
