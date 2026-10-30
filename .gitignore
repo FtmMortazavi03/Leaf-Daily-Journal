@@ -69,3 +69,6 @@ key.properties
 
 src/fix_leaf*.py
 tools/fix_leaf*.py
+
+src/index.html.bak*
+src/*.bak*
