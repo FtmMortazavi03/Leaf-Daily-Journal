@@ -523,7 +523,7 @@ body::before {
   display: none;
 }
 
-.hm-pair{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;}
+.hm-pair{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;direction:ltr;}
 .hm-box{display:flex;flex-direction:column;align-items:center;}
 .hm-box label{font-size:10px;color:var(--muted);margin-bottom:2px;}
 .hm-box input{width:50px;text-align:center;padding:6px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text);font-family:inherit;}
@@ -2137,7 +2137,8 @@ function renderDock() {
   $('lH').textContent = L.lH;
   $('lM').textContent = L.lM;
   $('addSessBtn').textContent = L.lAdd;
-  $('remainingHint').innerHTML = L.remainingHint(num(remaining, state.user.lang));
+  // PATCH[remaining-hint-use-fmtMin]: show hour+minute via fmtMin().
+  $('remainingHint').innerHTML = L.remainingHint(fmtMin(remaining, state.user.lang));
 
   const sel = $('subjSel');
   sel.innerHTML = '';
@@ -3390,87 +3391,10 @@ window.addEventListener('load', function() {
 </script>
 
 
-<script>
-window.addEventListener('load', function() {
-  function fixRemainingHint() {
-    var hintEl = document.getElementById('remainingHint');
-    if (!hintEl) return;
-
-    // خوندن متن فعلی و پیدا کردن عدد دقیقه از داخلش
-    // (چون تابع اصلی برنامه این متن رو می‌سازه، ما فقط عدد رو ازش می‌کشیم بیرون)
-    var currentText = hintEl.innerText || hintEl.textContent;
-    
-    // پیدا کردن اعداد فارسی، عربی یا انگلیسی در متن
-    var match = currentText.match(/[0-9۰-۹٠-٩]+/);
-    if (!match) return;
-
-    var numStr = match[0];
-    // تبدیل اعداد فارسی/عربی به انگلیسی برای محاسبه
-    var enNumStr = numStr.replace(/[۰-۹]/g, function(d) { return String.fromCharCode(d.charCodeAt(0) - 1728); })
-                        .replace(/[٠-٩]/g, function(d) { return String.fromCharCode(d.charCodeAt(0) - 1584); });
-    
-    var totalMins = parseInt(enNumStr, 10);
-    if (isNaN(totalMins) || totalMins <= 0) return;
-
-    // استفاده از تابع اصلی برنامه برای فرمت کردن (اگه در دسترس باشه)
-    // اگه نبود، خودمون فرمت می‌کنیم
-    var lang = document.documentElement.getAttribute('lang') || 'en';
-    var h = Math.floor(totalMins / 60);
-    var m = totalMins % 60;
-    
-    var formatted = '';
-    if (typeof window.fmtMin === 'function') {
-      // تابع اصلی برنامه رو صدا می‌زنیم (البته چون توی closure هست، شاید در دسترس نباشه)
-    }
-    
-    // فرمت دستی بر اساس زبان
-    if (lang === 'fa') {
-      var hFa = h.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
-      var mFa = m.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
-      formatted = h > 0 ? (m > 0 ? hFa + ' ساعت و ' + mFa + ' دقیقه' : hFa + ' ساعت') : mFa + ' دقیقه';
-      var __newHTML = 'امروز تا <b>' + formatted + '</b> دیگه می‌تونی ثبت کنی';
-      if (hintEl.innerHTML === __newHTML) return;
-      hintEl.innerHTML = __newHTML;
-    } else if (lang === 'ar') {
-      var hAr = h.toString().replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
-      var mAr = m.toString().replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
-      formatted = h > 0 ? (m > 0 ? hAr + ' ساعة و ' + mAr + ' دقيقة' : hAr + ' ساعة') : mAr + ' دقيقة';
-      var __newHTML = 'يمكنك تسجيل حتى <b>' + formatted + '</b> أخرى اليوم';
-      if (hintEl.innerHTML === __newHTML) return;
-      hintEl.innerHTML = __newHTML;
-    } else {
-      formatted = h > 0 ? (m > 0 ? h + 'h ' + m + 'm' : h + 'h') : m + 'm';
-      var __newHTML = 'Up to <b>' + formatted + '</b> more today';
-      if (hintEl.innerHTML === __newHTML) return;
-      hintEl.innerHTML = __newHTML;
-    }
-  }
-
-  // PATCH[fix-remaining-hint-loop]: guard against MutationObserver feedback
-  // The observer below rewrites innerHTML; without this guard the write
-  // re-triggers the observer forever → CPU 100% → WebView freeze.
-  if (hintEl.innerHTML === window.__leafLastHintHTML) return;
-
-// اجرای اولیه
-  fixRemainingHint();
-
-  // چون متن این بخش پویاست و با هر تغییر آپدیت میشه،
-  // یه مشاهده‌گر (Observer) روی اون می‌ذاریم که هر بار متنش عوض شد، دوباره فرمت کنه
-  var hintEl = document.getElementById('remainingHint');
-  if (hintEl) {
-    var observer = new MutationObserver(function() {
-      fixRemainingHint();
-    });
-    observer.observe(hintEl, { childList: true, characterData: true, subtree: true });
-  }
-
-  // هر بار که زبان عوض شد، دوباره اجرا کن
-  new MutationObserver(fixRemainingHint).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['lang']
-  });
-});
-</script>
+<!-- PATCH[remove-legacy-fix-remaining-hint]: the legacy fixRemainingHint
+     script was removed. remainingHint is now formatted in renderDock()
+     via fmtMin(), and the MutationObserver that caused the WebView
+     freeze loop is gone. -->
 
 </body>
 </html>
