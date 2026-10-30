@@ -66,3 +66,6 @@ release/
 *.keystore
 key.properties
 *.jks.bak
+
+src/fix_leaf*.py
+tools/fix_leaf*.py
