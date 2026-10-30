@@ -1586,6 +1586,14 @@ function save() {
   }
 }
 
+// PATCH[debounced-save-helper]: coalesce non-critical writes to reduce
+// synchronous localStorage stalls on low-end Android WebViews.
+let __saveTimer = null;
+function debouncedSave(delay) {
+  if (__saveTimer) clearTimeout(__saveTimer);
+  __saveTimer = setTimeout(() => { __saveTimer = null; save(); }, delay || 400);
+}
+
 function dailyBackup() {
   if (isResettingNow()) return;
   try {
@@ -1791,6 +1799,10 @@ function boot() {
   
   
   $('exportCsvBtn').addEventListener('click', exportCSV);
+  // PATCH[wire-import-csv]: wire the restore flow inside the same closure
+  // so importCSV (IIFE-scoped) is actually reachable.
+  $('importCsvBtn').addEventListener('click', () => $('importCsvFile').click());
+  $('importCsvFile').addEventListener('change', importCSV);
   
   
   
@@ -1817,7 +1829,7 @@ function boot() {
 
   $('subjSel').addEventListener('change', e => {
     state.selectedSubjectId = e.target.value;
-    save();
+    debouncedSave(300);
     updateSubmitEnabled();
   });
 
@@ -1876,10 +1888,14 @@ function boot() {
   if (!storageOK) setTimeout(() => toast(t().storageWarn, 'error'), 1200);
   if (!hasCharts()) setTimeout(() => toast(t().chartUnavailable, 'error'), 1400);
 
-  window.addEventListener('beforeunload', () => {
+  // PATCH[visibilitychange-backup]: beforeunload is unreliable in
+  // Android WebView; visibilitychange is the dependable signal.
+  const __backupIfLeaving = () => {
     if (isResettingNow()) return;
-    dailyBackup();
-  });
+    if (document.visibilityState === 'hidden') dailyBackup();
+  };
+  document.addEventListener('visibilitychange', __backupIfLeaving);
+  window.addEventListener('beforeunload', __backupIfLeaving);
 
   // Refresh reminder status when the app regains focus (e.g. next morning)
   window.addEventListener('focus', () => {
@@ -1893,7 +1909,12 @@ function switchScreen(name) {
   $('screen-' + name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(f => f.classList.toggle('active', f.dataset.screen === name));
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (name === 'stats') setTimeout(() => { try { chartTrend?.resize(); chartDonut?.resize(); } catch(_){} }, 100);
+  if (name === 'stats') {
+    // PATCH[rerender-heatmap-on-stats-enter]: refresh the heatmap when
+    // the Stats screen becomes visible (it is skipped elsewhere).
+    try { renderHeatmap(); } catch(_) {}
+    setTimeout(() => { try { chartTrend?.resize(); chartDonut?.resize(); } catch(_){} }, 100);
+  }
   if (name === 'history') renderHistory();
   if (name !== 'today') closeSubjPanel();
 }
@@ -1979,7 +2000,10 @@ function minToHm(min, hId, mId) {
 function renderAll() {
   renderGreeting(); renderDates(); renderHero();
   renderDock(); renderTodaySess();
-  renderStats(); renderTrend(); renderDonut(); renderHeatmap(); renderWeek();
+  renderStats(); renderTrend(); renderDonut(); renderWeek();
+  // PATCH[render-heatmap-only-on-stats]: heatmap is 365+ nodes; only
+  // rebuild when it is actually visible.
+  if (curScreen === 'stats') renderHeatmap();
   renderLabels(); renderFooter(); renderSubjGrid(); renderSettings();
   renderWeekBadge();
   if (curScreen === 'history') renderHistory();
@@ -2065,6 +2089,10 @@ function renderHero() {
 /* Animate the hero big number as H:MM (on the underlying total minutes). */
 function animateHM(el, to, lang) {
   if (animFrame) cancelAnimationFrame(animFrame);
+  // PATCH[hero-anim-sync]: if displayedNum drifted far from truth
+  // (e.g. multiple renderAll during an animation), snap instead of
+  // animating from a stale value.
+  if (Math.abs(displayedNum - to) > 600) displayedNum = to;
   const from = displayedNum;
   if (from === to) { el.textContent = fmtHM(to, lang); return; }
   const dur = 700;
@@ -2268,6 +2296,9 @@ function getSubjectTarget(subId) {
 }
 
 function openSubjPanel(subId, focusSessionId) {
+  // PATCH[guard-open-subj-panel]: if a chart was queued in a previous
+  // frame, cancel it so we never create two Charts for the same canvas.
+  if (chartSubj) { try { chartSubj.destroy(); } catch(_){} chartSubj = null; }
   openSubjId = subId;
   const sub = state.subjects.find(x => x.id === subId);
   if (!sub) return;
@@ -2730,13 +2761,13 @@ function changeLanguage(newLang) {
   if (!I18N[newLang]) return;
   state.user.lang = newLang;
   if (newLang === 'fa' && state.user.cal === 'gregorian') state.user.cal = 'jalali';
-  const factoryEn = defaultSubjects('en');
-  const factoryFa = defaultSubjects('fa');
-  const factoryAr = defaultSubjects('ar');
-  state.subjects = state.subjects.map((s, i) => {
-    const names = [factoryEn[i]?.name, factoryFa[i]?.name, factoryAr[i]?.name].filter(Boolean);
-    if (names.indexOf(s.name) !== -1) {
-      return { ...s, name: (I18N[newLang] || I18N.en)['defSubj' + (i+1)] || s.name };
+  // PATCH[safe-change-language]: only rename the built-in factory subjects
+  // (ids 's1'/'s2'). User-created subjects keep their names intact.
+  state.subjects = state.subjects.map(s => {
+    if (s.id === 's1' || s.id === 's2') {
+      const idx = s.id === 's1' ? 1 : 2;
+      const newName = (I18N[newLang] || I18N.en)['defSubj' + idx];
+      if (newName) return { ...s, name: newName };
     }
     return s;
   });
@@ -3141,9 +3172,11 @@ function bindToastDismiss(el) {
   const prev = el._cleanupSwipe;
   el._cleanupSwipe = () => {
     prev?.();
-    el.removeEventListener('touchstart', onTouchStart);
-    el.removeEventListener('touchmove', onTouchMove);
-    el.removeEventListener('touchend', onTouchEnd);
+    // PATCH[toast-idempotent-cleanup]: pass {passive:true} so removal
+    // matches the addEventListener options in every WebView.
+    el.removeEventListener('touchstart', onTouchStart, { passive: true });
+    el.removeEventListener('touchmove', onTouchMove, { passive: true });
+    el.removeEventListener('touchend', onTouchEnd, { passive: true });
     el.removeEventListener('pointerdown', onPointerDown);
     el.removeEventListener('pointermove', onPointerMove);
     el.removeEventListener('pointerup', onPointerUp);
@@ -3183,8 +3216,11 @@ document.addEventListener('input', function(e) {
     if (hidden && hidden.type === 'hidden') {
       var inputs = parent.querySelectorAll('input');
       if (inputs.length >= 2) {
-        hidden.value = (parseInt(inputs[0].value)||0)*60 + (parseInt(inputs[1].value)||0);
-        hidden.dispatchEvent(new Event('input', {bubbles:true}));
+        var __newVal = String((parseInt(inputs[0].value)||0)*60 + (parseInt(inputs[1].value)||0));
+        if (hidden.value !== __newVal) {
+          hidden.value = __newVal;
+          hidden.dispatchEvent(new Event('input', {bubbles:true}));
+        }
       }
     }
   }
@@ -3256,27 +3292,11 @@ initOB();
 
 <script>
 window.addEventListener('load', function() {
-  // اتصال دکمه پشتیبان‌گیری به خروجی CSV
-  var expBtn = document.getElementById('exportCsvBtn');
-  if (expBtn) {
-    expBtn.onclick = function(e) {
-      e.preventDefault();
-      if (typeof exportCSV === 'function') exportCSV();
-    };
-  }
+  // PATCH[remove-dup-export-wiring]: exportCsvBtn is now wired inside
+  // boot(); this duplicate onclick is removed to prevent double-download.
   
-  // اتصال دکمه بازیابی به ورودی CSV
-  var impBtn = document.getElementById('importCsvBtn');
-  var impFile = document.getElementById('importCsvFile');
-  if (impBtn && impFile) {
-    impBtn.onclick = function(e) {
-      e.preventDefault();
-      impFile.click();
-    };
-    impFile.onchange = function(e) {
-      if (typeof importCSV === 'function') importCSV(e);
-    };
-  }
+  // PATCH[remove-dup-import-wiring]: Restore wiring now happens inside
+  // boot(); this trailing block is removed.
 
   // تغییر نام دکمه‌های بخش داده‌ها برای هماهنگی
   var setDataL = document.getElementById('setDataL');
@@ -3408,19 +3428,30 @@ window.addEventListener('load', function() {
       var hFa = h.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
       var mFa = m.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
       formatted = h > 0 ? (m > 0 ? hFa + ' ساعت و ' + mFa + ' دقیقه' : hFa + ' ساعت') : mFa + ' دقیقه';
-      hintEl.innerHTML = 'امروز تا <b>' + formatted + '</b> دیگه می‌تونی ثبت کنی';
+      var __newHTML = 'امروز تا <b>' + formatted + '</b> دیگه می‌تونی ثبت کنی';
+      if (hintEl.innerHTML === __newHTML) return;
+      hintEl.innerHTML = __newHTML;
     } else if (lang === 'ar') {
       var hAr = h.toString().replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
       var mAr = m.toString().replace(/\d/g, x => '٠١٢٣٤٥٦٧٨٩'[x]);
       formatted = h > 0 ? (m > 0 ? hAr + ' ساعة و ' + mAr + ' دقيقة' : hAr + ' ساعة') : mAr + ' دقيقة';
-      hintEl.innerHTML = 'يمكنك تسجيل حتى <b>' + formatted + '</b> أخرى اليوم';
+      var __newHTML = 'يمكنك تسجيل حتى <b>' + formatted + '</b> أخرى اليوم';
+      if (hintEl.innerHTML === __newHTML) return;
+      hintEl.innerHTML = __newHTML;
     } else {
       formatted = h > 0 ? (m > 0 ? h + 'h ' + m + 'm' : h + 'h') : m + 'm';
-      hintEl.innerHTML = 'Up to <b>' + formatted + '</b> more today';
+      var __newHTML = 'Up to <b>' + formatted + '</b> more today';
+      if (hintEl.innerHTML === __newHTML) return;
+      hintEl.innerHTML = __newHTML;
     }
   }
 
-  // اجرای اولیه
+  // PATCH[fix-remaining-hint-loop]: guard against MutationObserver feedback
+  // The observer below rewrites innerHTML; without this guard the write
+  // re-triggers the observer forever → CPU 100% → WebView freeze.
+  if (hintEl.innerHTML === window.__leafLastHintHTML) return;
+
+// اجرای اولیه
   fixRemainingHint();
 
   // چون متن این بخش پویاست و با هر تغییر آپدیت میشه،
