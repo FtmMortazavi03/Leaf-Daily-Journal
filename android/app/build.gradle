@@ -16,15 +16,13 @@ android {
         }
     }
 
-        signingConfigs {
+    signingConfigs {
         release {
             storeFile file('F:/Leaf-Daily-Journal/leaf-release-key.jks')
             storePassword System.getenv("LEAF_STORE_PASSWORD") ?: "REPLACE_ME"
             keyAlias 'leaf'
             keyPassword System.getenv("LEAF_KEY_PASSWORD") ?: "REPLACE_ME"
         }
-    }
-    
     }
 
     buildTypes {

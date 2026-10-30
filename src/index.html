@@ -506,8 +506,137 @@ body::before {
   animation: fadeScreen 0.2s ease-out forwards;
 }
 
+
+/* ترجمه‌ی آیه — زیر آیه، خاکستری کم‌رنگ */
+.verse-translation {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: -16px 0 28px;
+  padding: 0 16px;
+  line-height: 1.9;
+  opacity: 0.85;
+  font-style: italic;
+  transition: color 0.3s ease;
+}
+.verse-translation:empty {
+  display: none;
+}
+
+.hm-pair{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;}
+.hm-box{display:flex;flex-direction:column;align-items:center;}
+.hm-box label{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.hm-box input{width:50px;text-align:center;padding:6px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text);font-family:inherit;}
+.hm-pair span{font-weight:bold;color:var(--muted);margin-top:14px;}
 </style>
 <link rel="stylesheet" href="./premium-effects.css">
+
+
+<style>
+/* اصلاح چیدمان بخش افزودن درس جدید در مودال هدف‌های امروز */
+.sow-add {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  width: 100%;
+}
+
+/* فیلد نام درس جدید - کشیده و بزرگ */
+.sow-add input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.92rem;
+  box-sizing: border-box;
+}
+
+/* بخش ساعت و دقیقه - کشیده */
+.sow-add .hm-pair {
+  display: flex;
+  width: 100% !important;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.sow-add .hm-pair .hm-box {
+  flex: 1; /* باعث می‌شه فیلدها کشیده بشن */
+}
+
+.sow-add .hm-pair input {
+  width: 100% !important;
+  padding: 12px !important;
+  font-size: 1rem !important;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* دکمه + - بزرگ، کشیده، زیر همه */
+.sow-add button#sowAddBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+}
+
+.sow-add button#sowAddBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+</style>
+
+
+<style>
+/* استایل جدید برای قرارگیری ترجمه داخل باکس آیه */
+.verse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px; /* فاصله‌ی داخلی مناسب */
+  gap: 12px; /* فاصله بین متن عربی و ترجمه */
+}
+
+.verse-arabic {
+  font-family: 'Traditional Arabic','Amiri','Scheherazade New',serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  direction: rtl;
+  text-align: center;
+  line-height: 2.1;
+  letter-spacing: .3px;
+}
+
+/* ترجمه داخل باکس */
+.verse-translation {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0 !important; /* حذف فاصله‌های مزاحم قبلی */
+  padding: 0 16px;
+  line-height: 1.9;
+  opacity: 0.85;
+  font-style: italic;
+  transition: color 0.3s ease;
+}
+
+.verse-translation:empty {
+  display: none;
+}
+</style>
 
 </head>
 <body>
@@ -601,7 +730,13 @@ body::before {
       <div class="date-main" id="dateMain">...</div>
       <div class="date-alt" id="dateAlt">...</div>
     </div>
-    <div class="verse">وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ</div>
+    <div class="verse">
+        <div class="verse-arabic">وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ</div>
+        <div class="verse-translation" id="verseTranslation"
+         data-fa="و اینکه برای انسان چیزی جز آنچه تلاش کرده نیست."
+         data-en="And that there is nothing for man except what he strives for."
+         data-ar=""></div>
+    </div>
 
     <div class="hero">
       <div class="hero-top">
@@ -760,7 +895,7 @@ body::before {
       <h3 id="setSubjL">Subjects</h3>
       <div class="igroup">
         <input type="text" id="newSubjName" placeholder="New subject name" autocomplete="off">
-        <input type="number" id="newSubjTarget" min="0" max="1440" step="5" placeholder="Target min" inputmode="numeric" spellcheck="false">
+        <div class="hm-pair"><div class="hm-box"><label>ساعت</label><input type="number" id="newSubjH" min="0" max="23" value="0"></div><span>:</span><div class="hm-box"><label>دقیقه</label><input type="number" id="newSubjM" min="0" max="59" value="0"></div></div><input type="hidden" id="newSubjTarget" value="0">
         <input type="color" class="cpick" id="newSubjColor" value="#2563eb">
         <button type="button" class="btn btn-primary" id="addSubjBtn">Add</button>
       </div>
@@ -769,17 +904,11 @@ body::before {
 
     <div class="set-group">
       <h3 id="setDataL">Data</h3>
-      <div class="btn-row">
-        <button type="button" class="btn btn-ghost" id="exportBtn" style="flex:1">Backup</button>
-        <button type="button" class="btn btn-ghost" id="importBtn" style="flex:1">Restore</button>
-        <input type="file" id="importFile" accept=".json" hidden>
+      <div class="btn-row" style="display:flex; gap:10px; margin-top:12px;">
+        <button type="button" class="btn btn-primary" id="exportCsvBtn" style="flex:1; padding:12px; border-radius:8px; background:var(--accent); color:var(--accent-text); font-weight:bold;">پشتیبان‌گیری</button>
+        <button type="button" class="btn btn-ghost" id="importCsvBtn" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border2); background:var(--bg); color:var(--text); font-weight:bold;">بازیابی</button>
       </div>
-      <button type="button" class="btn btn-ghost" id="importCsvBtn" style="width:100%;margin-top:10px">Import CSV</button>
       <input type="file" id="importCsvFile" accept=".csv,text/csv" hidden>
-      <button type="button" class="btn btn-ghost" id="quickBackupBtn" style="width:100%;margin-top:10px">Quick backup (JSON)</button>
-      <button type="button" class="btn btn-ghost" id="exportCsvBtn" style="width:100%;margin-top:10px"></button>
-      <button type="button" class="btn btn-danger" id="resetBtn" style="width:100%;margin-top:10px">Reset all data</button>
-    </div>
 
     <div class="footer">
       <div class="sig">
@@ -816,12 +945,17 @@ body::before {
     <div class="sow-list" id="sowList"></div>
     <div class="sow-add">
       <input type="text" id="sowNewName" placeholder="New subject" autocomplete="off">
-      <input type="number" id="sowNewTarget" min="0" max="1440" step="5" placeholder="min" inputmode="numeric" spellcheck="false">
+      <div class="hm-pair" style="width:110px; margin:0 4px;">
+  <div class="hm-box"><input type="number" id="sowNewH" min="0" max="23" value="0" placeholder="ساعت"></div>
+  <span class="hm-sep">:</span>
+  <div class="hm-box"><input type="number" id="sowNewM" min="0" max="59" value="0" placeholder="دقیقه"></div>
+</div>
+<input type="hidden" id="sowNewTarget" value="0">
       <button id="sowAddBtn" type="button">+</button>
     </div>
     <div class="sow-total">
       <span class="lbl" id="sowTotalLbl">Daily target</span>
-      <input type="number" id="sowTotalInput" min="5" max="1440" step="5" placeholder="60" inputmode="numeric" spellcheck="false">
+      <div class="hm-pair" style="width:130px"><div class="hm-box"><label>ساعت</label><input type="number" id="sowTotalH" min="0" max="23" value="0"></div><span>:</span><div class="hm-box"><label>دقیقه</label><input type="number" id="sowTotalM" min="0" max="59" value="0"></div></div><input type="hidden" id="sowTotalInput" value="0">
     </div>
     <div class="sow-hint" id="sowHint"></div>
     <div class="macts"><button type="button" class="btn btn-ghost" id="sowC">Cancel</button><button type="button" class="btn btn-primary" id="sowS">Save</button></div>
@@ -1654,14 +1788,14 @@ function boot() {
   $('wSave').addEventListener('click', saveWGoal);
   $('addSubjBtn').addEventListener('click', addSubject);
   $('sowAddBtn').addEventListener('click', addSubjectFromSow);
-  $('exportBtn').addEventListener('click', exportData);
-  $('quickBackupBtn').addEventListener('click', exportData);
+  
+  
   $('exportCsvBtn').addEventListener('click', exportCSV);
-  $('importBtn').addEventListener('click', () => $('importFile').click());
-  $('importFile').addEventListener('change', importData);
-  $('importCsvBtn').addEventListener('click', () => $('importCsvFile').click());
-  $('importCsvFile').addEventListener('change', importCSV);
-  $('resetBtn').addEventListener('click', resetAll);
+  
+  
+  
+  
+  
   $('setLangSel').addEventListener('change', e => changeLanguage(e.target.value));
   $('setCalSel').addEventListener('change', e => { state.user.cal = e.target.value; save(); renderAll(); });
   $('setNameIn').addEventListener('change', e => { const v = e.target.value.trim(); if (v) state.user.name = v; save(); renderAll(); });
@@ -1829,6 +1963,19 @@ const t = () => I18N[state.user.lang] || I18N.en;
 /* ============================================================
    Renderers
    ============================================================ */
+
+function hmToMin(hId, mId) {
+  var h = parseInt(document.getElementById(hId).value) || 0;
+  var m = parseInt(document.getElementById(mId).value) || 0;
+  return h * 60 + m;
+}
+function minToHm(min, hId, mId) {
+  var h = Math.floor(min / 60);
+  var m = min % 60;
+  document.getElementById(hId).value = h;
+  document.getElementById(mId).value = m;
+}
+
 function renderAll() {
   renderGreeting(); renderDates(); renderHero();
   renderDock(); renderTodaySess();
@@ -2488,12 +2635,12 @@ function renderLabels() {
   $('setFriRemL').textContent = L.setFriRemL;
   $('setSubjL').textContent = L.setSubjL;
   $('setDataL').textContent = L.setDataL;
-  $('exportBtn').textContent = L.backup;
-  $('importBtn').textContent = L.restore;
-  $('importCsvBtn').textContent = L.importCsv;
-  $('quickBackupBtn').textContent = L.quickBackup;
-  $('exportCsvBtn').textContent = L.exportCsv;
-  $('resetBtn').textContent = L.reset;
+  
+  
+  
+  
+  
+  
   $('oG').textContent = L.gregorian;
   $('oJ').textContent = L.jalali;
   $('oH').textContent = L.hijri;
@@ -2609,26 +2756,29 @@ function openSow() {
       const row = document.createElement('div');
       row.className = 'sow-item';
       const val = (typeof savedTargets[s.id] === 'number') ? savedTargets[s.id] : (s.dailyTarget || 0);
-      row.innerHTML = `<span class="dot" style="background:${esc(s.color)}"></span><span class="nm">${esc(s.name)}</span><input type="number" min="0" max="1440" step="5" value="${val}" data-subj="${esc(s.id)}" inputmode="numeric" spellcheck="false" aria-label="${esc(s.name)}">`;
+      const h = Math.floor(val/60); const m = val%60;
+      row.innerHTML = `<span class="dot" style="background:${esc(s.color)}"></span><span class="nm" style="flex:1">${esc(s.name)}</span><div class="hm-pair"><div class="hm-box"><input type="number" value="${h}" data-subj-h="${esc(s.id)}" min="0" max="23"></div><span>:</span><div class="hm-box"><input type="number" value="${m}" data-subj-m="${esc(s.id)}" min="0" max="59"></div></div><input type="hidden" value="${val}" data-subj="${esc(s.id)}">`;
       list.appendChild(row);
     });
     list.querySelectorAll('input').forEach(inp => inp.addEventListener('input', updateSowHint));
   }
   const sum = computeSowSum();
-  $('sowTotalInput').value = savedTotal || sum || '';
+  minToHm(savedTotal || sum || 0, 'sowTotalH', 'sowTotalM');
+  $('sowTotalInput').value = savedTotal || sum || 0;
   updateSowHint();
   openModal('sowM');
   setTimeout(() => { const el = $('sowList').querySelector('input'); el?.focus(); }, 100);
 }
 function computeSowSum() {
   let total = 0;
-  $('sowList').querySelectorAll('input').forEach(inp => { total += toInt(inp.value); });
+  $('sowList').querySelectorAll('input[type="hidden"]').forEach(inp => { total += toInt(inp.value); });
   return total;
 }
 function updateSowHint() {
   const L = t();
   const sum = computeSowSum();
-  const manual = toInt($('sowTotalInput').value);
+  const manual = hmToMin('sowTotalH', 'sowTotalM');
+  document.getElementById('sowTotalInput').value = manual;
   const hint = $('sowHint');
   if (!manual || manual === sum) hint.textContent = L.sowHintAuto;
   else hint.textContent = L.sowHintManual(num(sum, state.user.lang));
@@ -2636,12 +2786,12 @@ function updateSowHint() {
 function saveSow() {
   const L = t();
   const targets = {};
-  $('sowList').querySelectorAll('input').forEach(inp => {
+  $('sowList').querySelectorAll('input[type="hidden"]').forEach(inp => {
     const v = clamp(toInt(inp.value), 0, 1440);
     if (v > 0) targets[inp.dataset.subj] = v;
   });
   const sum = Object.values(targets).reduce((a,b) => a+b, 0);
-  const manual = clamp(toInt($('sowTotalInput').value), 0, 1440);
+  const manual = clamp(hmToMin('sowTotalH', 'sowTotalM'), 0, 1440);
   targets.total = manual || sum;
   state.dailyTargets[today()] = targets;
   save();
@@ -2650,7 +2800,7 @@ function saveSow() {
 }
 function addSubjectFromSow() {
   const n = $('sowNewName').value.trim().replace(/\s+/g, ' ').slice(0, SUBJ_NAME_MAX);
-  const tg = clamp(toInt($('sowNewTarget').value), 0, 1440);
+  const tg = clamp((toInt($('sowNewH')?.value) * 60) + toInt($('sowNewM')?.value), 0, 1440);
   if (!n) return;
   if (state.subjects.some(s => s.name.toLowerCase() === n.toLowerCase())) { toast(t().nameTaken, 'error'); return; }
   const colors = ['#dc2626','#2563eb','#16a34a','#9333ea','#ea580c','#0d9488','#db2777','#71717a'];
@@ -2704,12 +2854,12 @@ function addSession(min, id) {
 function addSubject() {
   const n = $('newSubjName').value.trim().replace(/\s+/g, ' ').slice(0, SUBJ_NAME_MAX);
   const c = $('newSubjColor').value;
-  const tg = clamp(toInt($('newSubjTarget').value), 0, 1440);
+  const tg = clamp(hmToMin('newSubjH', 'newSubjM'), 0, 1440);
   if (!n) return;
   if (state.subjects.some(s => s.name.toLowerCase() === n.toLowerCase())) { toast(t().nameTaken, 'error'); return; }
   state.subjects.push({ id: cryptoId(), name: n, color: c, dailyTarget: tg });
   $('newSubjName').value = '';
-  $('newSubjTarget').value = '';
+  $('newSubjH').value = 0; $('newSubjM').value = 0; $('newSubjTarget').value = 0;
   save(); renderAll(); toast(t().saved, 'success');
 }
 function saveWGoal() {
@@ -3025,6 +3175,21 @@ document.addEventListener('input', (e) => {
   if (e.target && (e.target.id === 'hIn' || e.target.id === 'mIn')) updateSubmitEnabled();
 });
 
+
+document.addEventListener('input', function(e) {
+  if (e.target.closest('.hm-pair')) {
+    var parent = e.target.closest('.hm-pair');
+    var hidden = parent.nextElementSibling;
+    if (hidden && hidden.type === 'hidden') {
+      var inputs = parent.querySelectorAll('input');
+      if (inputs.length >= 2) {
+        hidden.value = (parseInt(inputs[0].value)||0)*60 + (parseInt(inputs[1].value)||0);
+        hidden.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+    }
+  }
+});
+
 initOB();
 
 })();
@@ -3037,5 +3202,87 @@ initOB();
 //   });
 // }
 </script>
+<script>
+/* ============ verse translation (auto by language) ============ */
+(function() {
+  function updateVerseTranslation() {
+    var el = document.getElementById('verseTranslation');
+    if (!el) return;
+    var lang = (window.__leafLang || document.documentElement.getAttribute('lang') || 'en');
+    var text = el.getAttribute('data-' + lang) || '';
+    if (text && text.trim()) {
+      el.textContent = text;
+      el.style.display = '';
+    } else {
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+  }
+
+  // وقتی صفحه لود شد
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateVerseTranslation);
+  } else {
+    updateVerseTranslation();
+  }
+
+  // هر بار که زبان عوض شد، آپدیت کن
+  var observer = new MutationObserver(updateVerseTranslation);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+  // در دسترس گذاشتن برای فراخوانی دستی از جاوااسکریپت اصلی
+  window.__updateVerseTranslation = updateVerseTranslation;
+})();
+</script>
+
+<script>
+(function() {
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest && e.target.closest('#sowAddBtn');
+    if (btn) {
+      var h = document.getElementById('sowNewH');
+      var m = document.getElementById('sowNewM');
+      var t = document.getElementById('sowNewTarget');
+      if (h && m && t) {
+        t.value = (parseInt(h.value) || 0) * 60 + (parseInt(m.value) || 0);
+        // پاک کردن فیلدها بعد از زدن دکمه
+        setTimeout(function(){ h.value = 0; m.value = 0; }, 50);
+      }
+    }
+  }, true);
+})();
+</script>
+
+
+<script>
+window.addEventListener('load', function() {
+  // اتصال دکمه پشتیبان‌گیری به خروجی CSV
+  var expBtn = document.getElementById('exportCsvBtn');
+  if (expBtn) {
+    expBtn.onclick = function(e) {
+      e.preventDefault();
+      if (typeof exportCSV === 'function') exportCSV();
+    };
+  }
+  
+  // اتصال دکمه بازیابی به ورودی CSV
+  var impBtn = document.getElementById('importCsvBtn');
+  var impFile = document.getElementById('importCsvFile');
+  if (impBtn && impFile) {
+    impBtn.onclick = function(e) {
+      e.preventDefault();
+      impFile.click();
+    };
+    impFile.onchange = function(e) {
+      if (typeof importCSV === 'function') importCSV(e);
+    };
+  }
+
+  // تغییر نام دکمه‌های بخش داده‌ها برای هماهنگی
+  var setDataL = document.getElementById('setDataL');
+  if (setDataL) setDataL.textContent = 'پشتیبان‌گیری و بازیابی';
+});
+</script>
+
 </body>
 </html>
